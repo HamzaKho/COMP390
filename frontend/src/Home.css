@@ -1,0 +1,45 @@
+.home {
+    display: flex;
+    height: 100vh; /* Full height of the viewport */
+  }
+  
+  .sidebar {
+    width: 125px; /* Adjust the width as needed */
+    background-color: #f0f0f0; /* Light grey background */
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Add some shadow for depth */
+  }
+  
+  .sidebar a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: black;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .sidebar a:hover {
+    background-color: #ddd; /* Slight change on hover */
+  }
+  
+  .content {
+    flex-grow: 1; /* Take up the remaining space */
+    padding: 20px;
+    background-color: #fff; /* White background for the content */
+  }
+  .logout-button {
+    padding: 10px 15px;
+    background-color: #f44336; /* Red color for the logout button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px; /* Space from the last link */
+  }
+  
+  .logout-button:hover {
+    background-color: #d32f2f; /* Slightly darker shade on hover */
+  }
+  

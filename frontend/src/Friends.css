@@ -1,0 +1,110 @@
+.sidebar {
+    width: 125px; /* Adjust the width as needed */
+    background-color: #f0f0f0; /* Light grey background */
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Add some shadow for depth */
+  }
+  
+  .sidebar a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: black;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .sidebar a:hover {
+    background-color: #ddd; /* Slight change on hover */
+  }
+
+  .friends-container {
+    display: flex;
+  }
+.friends-page {
+    font-family: Arial, sans-serif;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 10px;
+  }
+  
+  .search-bar {
+    display: flex;
+    width: 1000px;
+    margin-bottom: 20px;
+  }
+  
+  .search-bar input {
+    flex: 1;
+    padding: 10px;
+    margin-right: 5px;
+  }
+  
+  .search-bar button {
+    padding: 10px;
+  }
+
+
+  .search-result {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px; /* Adds space between each search result */
+  }
+
+  .search-result button {
+    background-color: #4CAF50; /* Green background color */
+    color: white;
+    border: none;
+    padding: 5px 10px; /* Adjust padding as needed */
+    margin-left: 10px; /* Adds space between the username and the button */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Mouse cursor changes to pointer on hover */
+    font-size: 0.9rem;
+  }
+
+  .search-result button:hover {
+    background-color: #45a049; /* Darker shade of green on hover */
+  }
+
+  .no-results {
+    text-align: center;
+    margin-top: 20px;
+    color: #666; /* Example color */
+    font-style: italic;
+  }
+
+.green-button {
+    background-color: green;
+    color: white;
+    margin-left: 10px;
+    border-radius:15px;  
+}
+  
+  .red-button {
+    background-color: red;
+    color: white;
+    margin-left: 10px;
+    border-radius:15px;
+  }
+
+  .status-pending {
+    color: white;
+    background-color: orange;
+    margin-left: 10px;
+    display: inline-block;
+  padding: 5px 10px;
+  border: 1px solid orange;
+  border-radius: 5px;
+  }
+  
+  .status-rejected {
+    color: white;
+    background-color: red;
+    margin-left: 10px;
+    display: inline-block;
+  padding: 5px 10px;
+  border: 1px solid red;
+  border-radius: 5px;
+  }
+  
