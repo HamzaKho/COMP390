@@ -7,10 +7,91 @@ const Friends = ({ onLogout, loggedInUserId }) => {
   const [sentRequests, setSentRequests] = useState([]);
   const [userFriends, setUserFriends] = useState([]);
   useEffect(() => {
+    const fetchIncomingRequests = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8081/friendRequests/${loggedInUserId}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setFriendRequests(data);
+        } else {
+          console.error("Error fetching friend requests:", response.staus);
+        }
+      } catch (error) {
+        console.error("Error fetching friend requests:", error);
+      }
+    };
+
+    const fetchSentRequests = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8081/sentFriendRequests/${loggedInUserId}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setSentRequests(data);
+        } else {
+          console.error(
+            "Error fetching sent friend requests:",
+            response.status
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching sent friend requests:", error);
+      }
+    };
+
+    const fetchUserFriends = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8081/userFriends/${loggedInUserId}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setUserFriends(data);
+        } else {
+          console.error("Error fetching user's friends:", response.status);
+        }
+      } catch (error) {
+        console.error("Error fetching user's friends:", error);
+      }
+    };
+
+    const clearAcceptedRequests = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8081/clearAcceptedRequests",
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log(result.message);
+        } else {
+          console.error(
+            "Failed to clear accepted friend requests:",
+            response.status
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Error when attempting to clear accepted friend requests:",
+          error
+        );
+      }
+    };
+
     fetchIncomingRequests();
     fetchSentRequests();
     fetchUserFriends();
-  }, []);
+    clearAcceptedRequests();
+  }, [loggedInUserId]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -29,10 +110,14 @@ const Friends = ({ onLogout, loggedInUserId }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ searchTerm }),
+        body: JSON.stringify({ searchTerm, loggedInUserId }), // Include loggedInUserId in the body
       });
-      const data = await response.json();
-      setSearchResults(data);
+      if (response.ok) {
+        const data = await response.json();
+        setSearchResults(data);
+      } else {
+        console.error("Error fetching search results:", response.status);
+      }
     } catch (error) {
       console.error("Error fetching search results:", error);
     }
@@ -56,44 +141,19 @@ const Friends = ({ onLogout, loggedInUserId }) => {
       });
       if (response.ok) {
         console.log("Friend request sent successfully");
-        // You can update the UI to indicate that the request has been sent
+        const newFriendRequest = await response.json();
+        /*
+        setSentRequests((prevRequests) => [...prevRequests, newFriendRequest]);
+        setSearchResults((prevResults) =>
+          prevResults.filter((user) => user.id !== friendId)
+        );
+        */
+        window.location.reload();
       } else {
         console.error("Failed to send friend request");
       }
     } catch (error) {
       console.error("Error sending friend request:", error);
-    }
-  };
-
-  const fetchIncomingRequests = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:8081/friendRequests/${loggedInUserId}`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setFriendRequests(data);
-      } else {
-        console.error("Error fetching friend requests:", response.staus);
-      }
-    } catch (error) {
-      console.error("Error fetching friend requests:", error);
-    }
-  };
-
-  const fetchSentRequests = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:8081/sentFriendRequests/${loggedInUserId}`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setSentRequests(data);
-      } else {
-        console.error("Error fetching sent friend requests:", response.status);
-      }
-    } catch (error) {
-      console.error("Error fetching sent friend requests:", error);
     }
   };
 
@@ -121,21 +181,51 @@ const Friends = ({ onLogout, loggedInUserId }) => {
     }
   };
 
-  const fetchUserFriends = async () => {
+  const handleDeleteRequest = async (requestId) => {
     try {
-      const response = await fetch(
-        `http://localhost:8081/userFriends/${loggedInUserId}`
+      const fetchResponse = await fetch(
+        "http://localhost:8081/deleteFriendRequest",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ requestId }),
+        }
       );
-      if (response.ok) {
-        const data = await response.json();
-        console.log(data);
-        setUserFriends(data);
-        console.log(userFriends);
+      if (fetchResponse.ok) {
+        console.log("Deleted friend request succesfully");
+        setSentRequests((currentSentRequests) =>
+          currentSentRequests.filter((request) => request.id !== requestId)
+        );
       } else {
-        console.error("Error fetching user's friends:", response.status);
+        console.error("Failed to Delete Friend Request");
       }
     } catch (error) {
-      console.error("Error fetching user's friends:", error);
+      console.error("Error deleting friend request", error);
+    }
+  };
+
+  const handleRemoveFriend = async (friendUsername) => {
+    console.log("Sending Request Body:", { loggedInUserId, friendUsername });
+    try {
+      const fetchResponse = await fetch("http://localhost:8081/removeFriend", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ loggedInUserId, friendUsername }),
+      });
+      if (fetchResponse.ok) {
+        console.log("Removed Friend successfully");
+        setUserFriends((currentFriends) =>
+          currentFriends.filter((friend) => friend.id !== friend)
+        );
+      } else {
+        console.log("Failed to remove friend");
+      }
+    } catch (error) {
+      console.error("Error removing friend", error);
     }
   };
 
@@ -209,9 +299,17 @@ const Friends = ({ onLogout, loggedInUserId }) => {
             sentRequests.map((request) => (
               <div key={request.id} className="sent-request">
                 {request.receiverUsername}
-                <span className={`status-${request.status.toLowerCase()}`}>
-                  {request.status}
+                <span
+                  className={`status-${request.status?.toLowerCase() || ""}`}
+                >
+                  {request.status || "Loading..."}
                 </span>
+                <button
+                  className="red-button"
+                  onClick={() => handleDeleteRequest(request.id)}
+                >
+                  Delete
+                </button>
               </div>
             ))
           )}
@@ -221,11 +319,23 @@ const Friends = ({ onLogout, loggedInUserId }) => {
           {userFriends.length === 0 ? (
             <p>No friends found</p>
           ) : (
-            userFriends.map((friend) => (
-              <div key={friend.id} className="friend">
-                {friend.friendUsername}
-              </div>
-            ))
+            userFriends.map((friend) => {
+              // Add this console log to check the IDs
+              console.log("User Friends:", userFriends);
+              return (
+                <div key={friend.id} className="friend">
+                  {friend.friendUsername}
+                  <button
+                    className="red-button"
+                    onClick={() => {
+                      handleRemoveFriend(friend.friendUsername);
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              );
+            })
           )}
         </div>
         {/* Rest of the main content */}

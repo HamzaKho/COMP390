@@ -22,15 +22,15 @@
     display: flex;
   }
 .friends-page {
+  flex-grow: 1;
     font-family: Arial, sans-serif;
-    max-width: 900px;
     margin: 0 auto;
     padding: 10px;
   }
   
   .search-bar {
     display: flex;
-    width: 1000px;
+    width: 100%;
     margin-bottom: 20px;
   }
   
@@ -75,18 +75,35 @@
   }
 
 .green-button {
-    background-color: green;
+    background-color:  #4CAF50;
     color: white;
-    margin-left: 10px;
-    border-radius:15px;  
+  border: none; 
+  padding: 5px 10px; 
+  border-radius: 5px; 
+  cursor: pointer; 
+  margin-left: 10px;
+  box-shadow: none;
+  text-transform: lowercase;
+}
+.green-button:hover{
+  background-color: #45a049;
 }
   
-  .red-button {
-    background-color: red;
-    color: white;
-    margin-left: 10px;
-    border-radius:15px;
-  }
+.red-button {
+  background-color: rgb(248, 68, 68);
+  color: white;
+  border: none; 
+  padding: 5px 10px; 
+  border-radius: 5px; 
+  cursor: pointer; 
+  margin-left: 10px;
+  box-shadow: none;
+  text-transform: lowercase;
+}
+.red-button:hover {
+  background-color: #cc0000; /* Darker shade of red for the hover effect */
+}
+
 
   .status-pending {
     color: white;
@@ -94,7 +111,8 @@
     margin-left: 10px;
     display: inline-block;
   padding: 5px 10px;
-  border: 1px solid orange;
+  /*border: 1px solid orange;*/
+  text-transform: lowercase;
   border-radius: 5px;
   }
   

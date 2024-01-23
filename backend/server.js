@@ -77,29 +77,43 @@ app.post("/login", async (req, res) => {
 });
 
 app.post("/search", (req, res) => {
-  const searchTerm = req.body.searchTerm;
+  const { searchTerm, loggedInUserId } = req.body;
   if (!searchTerm) {
     return res.status(400).json({ message: "Search term is required" });
   }
-  const sqlQuery = "SELECT id, username FROM users WHERE username LIKE ?";
-  db.query(sqlQuery, [`%${searchTerm}%`], (error, results) => {
-    if (error) {
-      return res.status(500).json({ message: "Database error", error });
+
+  const sqlQuery = `
+    SELECT u.id, u.username 
+    FROM users u
+    LEFT JOIN friend_requests fr 
+    ON u.id = fr.receiver_id AND fr.sender_id = ?
+    WHERE u.username LIKE ? AND u.id != ? AND fr.id IS NULL`;
+
+  db.query(
+    sqlQuery,
+    [loggedInUserId, `%${searchTerm}%`, loggedInUserId],
+    (error, results) => {
+      if (error) {
+        return res.status(500).json({ message: "Database error", error });
+      }
+      return res.status(200).json(results);
     }
-    return res.status(200).json(results);
-  });
+  );
 });
 
 app.post("/sendFriendRequest", (req, res) => {
   const senderId = req.body.senderId;
   const receiverId = req.body.receiverId;
-
   if (!senderId || !receiverId) {
     return res
       .status(400)
       .json({ message: "Sender and receiver IDs are required" });
   }
-
+  if (senderId == receiverId) {
+    return res
+      .status(400)
+      .json({ message: "Sender and reciever ID is the same" });
+  }
   // Check if a friend request already exists
   const checkExistingRequestQuery =
     "SELECT * FROM friend_requests WHERE sender_id = ? AND receiver_id = ?";
@@ -234,6 +248,98 @@ app.post("/respondToFriendRequest", (req, res) => {
         }
       );
     }
+  });
+});
+
+app.post("/deleteFriendRequest", (req, res) => {
+  const requestId = req.body.requestId;
+  const query = "DELETE FROM friend_requests WHERE id = ?";
+  db.query(query, [requestId], (error) => {
+    if (error) {
+      return res.status(500).json({ message: "Database error", error });
+    }
+    return res.status(200).json({ message: "Friend request deleted" });
+  });
+});
+
+app.delete("/clearAcceptedRequests", (req, res) => {
+  const deleteAcceptedRequestsQuery =
+    "DELETE FROM friend_requests WHERE status = 'accepted'";
+
+  db.query(deleteAcceptedRequestsQuery, (error, results) => {
+    if (error) {
+      console.error(
+        "Database error while deleting accepted friend requests:",
+        error
+      );
+      res.status(500).json({ message: "Database error", error });
+    } else {
+      console.log(
+        `Cleared all accepted friend requests. Rows affected: ${results.affectedRows}`
+      );
+      res.status(200).json({
+        message: "Cleared all accepted friend requests",
+        rowsAffected: results.affectedRows,
+      });
+    }
+  });
+});
+
+app.post("/removeFriend", (req, res) => {
+  const { loggedInUserId, friendUsername } = req.body;
+  console.log("Received IDs:", loggedInUserId, friendUsername);
+
+  if (!loggedInUserId || !friendUsername) {
+    return res
+      .status(400)
+      .json({ message: "User ID and friend's username are required" });
+  }
+
+  // First, find the ID of the friend username
+  const findFriendIdQuery = "SELECT id FROM users WHERE username = ?";
+  db.query(findFriendIdQuery, [friendUsername], (findError, findResults) => {
+    if (findError) {
+      console.error("Database error while finding friend ID:", findError);
+      return res.status(500).json({ message: "Database error", findError });
+    }
+    if (findResults.length === 0) {
+      console.log("Friend username not found.");
+      return res.status(404).json({ message: "Friend username not found" });
+    }
+
+    const friendId = findResults[0].id;
+    console.log(
+      `Found friend ID for username '${friendUsername}': ${friendId}`
+    );
+
+    // Now proceed with the deletion
+    const deleteQuery = `
+      DELETE FROM friendships 
+      WHERE (user1_id = ? AND user2_id = ?) 
+      OR (user1_id = ? AND user2_id = ?)`;
+
+    db.query(
+      deleteQuery,
+      [loggedInUserId, friendId, friendId, loggedInUserId],
+      (deleteError, deleteResults) => {
+        if (deleteError) {
+          console.error("Database error during deletion:", deleteError);
+          return res
+            .status(500)
+            .json({ message: "Database error", deleteError });
+        }
+        if (deleteResults.affectedRows === 0) {
+          console.log(
+            "No rows affected, check the friend IDs and the database integrity."
+          );
+          return res.status(404).json({ message: "Friendship not found" });
+        }
+        console.log(
+          `Friendship between ${loggedInUserId} and ${friendId} removed`
+        );
+        return res.status(200).json({ message: "Friend removed" });
+      }
+    );
   });
 });
 
