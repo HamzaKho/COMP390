@@ -172,7 +172,8 @@ const Friends = ({ onLogout, loggedInUserId }) => {
       if (fetchResponse.ok) {
         console.log("Friend request response sent successfully");
         // Update the state to filter out the friend request that has been responded to
-        setFriendRequests((prev) => prev.filter((req) => req.id !== requestId));
+        //setFriendRequests((prev) => prev.filter((req) => req.id !== requestId));
+        window.location.reload();
       } else {
         console.error("Failed to send friend request response");
       }
@@ -218,9 +219,10 @@ const Friends = ({ onLogout, loggedInUserId }) => {
       });
       if (fetchResponse.ok) {
         console.log("Removed Friend successfully");
-        setUserFriends((currentFriends) =>
+        /*setUserFriends((currentFriends) =>
           currentFriends.filter((friend) => friend.id !== friend)
-        );
+        );*/
+        window.location.reload();
       } else {
         console.log("Failed to remove friend");
       }

@@ -1,7 +1,9 @@
 .home {
-    display: flex;
-    height: 100vh; /* Full height of the viewport */
-  }
+  display: flex;
+  height: 100vh;
+  max-width: 100vw;
+  overflow-x: auto;
+}
   
   .sidebar {
     width: 125px; /* Adjust the width as needed */
@@ -42,4 +44,76 @@
   .logout-button:hover {
     background-color: #d32f2f; /* Slightly darker shade on hover */
   }
+
+  .games-section {
+    margin-bottom: 20px;
+  }
   
+  .games-list {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 17%;
+    gap: 10px; /* gap between boxes */
+    padding-bottom: 10px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+
+    scroll-snap-type: inline mandatory;
+  }
+  
+  .game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    flex: 0 0 auto;    
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: #f3f3f3;
+    transition: transform 0.2s ease-in-out;
+    transform: perspective(600px) rotateX(0deg);
+    overflow: hidden;
+
+    scroll-snap-align: start;
+    scroll-padding-inline: 1rem;
+  }
+  .game:hover {
+    transform: perspective(600px) rotateX(-1deg) scale(1.1);
+  }
+  
+  .game img {
+    width: 100%;
+    height: 70%; /* Set the image to fill the container */
+    object-fit: cover; /* Maintain aspect ratio and cover container */
+  }
+
+  .game h3 {
+    font-size: 1rem; /* Adjust text size as needed */
+    margin: 5px 0;
+    padding: 5px 10px;
+  }
+
+  .loading-placeholder {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 17%;
+    gap: 10px; /* gap between boxes */
+    padding-bottom: 10px;
+    align-items: center;
+    flex: 0 0 auto;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: linear-gradient(to right, #f6f7f8 8%, #edeef1 18%, #f6f7f8 33%);
+    background-size: 1000px 104px;
+    height: 200px; /* Adjust according to your layout */
+    animation: shimmer 0.7s infinite linear forwards;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -468px 0;
+    }
+    100% {
+      background-position: 468px 0;
+    }
+  }
