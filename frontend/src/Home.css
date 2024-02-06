@@ -45,6 +45,33 @@
     background-color: #d32f2f; /* Slightly darker shade on hover */
   }
 
+  .search-section {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .search-input {
+    padding: 10px;
+    width: 90%;
+    max-width: 400px; /* Adjust as needed */
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+
+  .search-button {
+    padding: 10px;
+    margin-left: 10px; /* Space between the input field and button */
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .search-button:hover {
+    background-color: #45a049;
+  }
+  
   .games-section {
     margin-bottom: 20px;
   }
@@ -62,6 +89,7 @@
   }
   
   .game {
+    height: 200px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -97,7 +125,7 @@
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: 17%;
-    gap: 10px; /* gap between boxes */
+    gap: 10px; 
     padding-bottom: 10px;
     align-items: center;
     flex: 0 0 auto;
@@ -105,7 +133,7 @@
     border-radius: 5px;
     background: linear-gradient(to right, #f6f7f8 8%, #edeef1 18%, #f6f7f8 33%);
     background-size: 1000px 104px;
-    height: 200px; /* Adjust according to your layout */
+    height: 200px;
     animation: shimmer 0.7s infinite linear forwards;
   }
 
