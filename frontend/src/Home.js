@@ -19,11 +19,13 @@ const Home = ({ onLogout }) => {
   const endDate = currentDate.toISOString().split("T")[0];
   const startDate = lastMonthDate.toISOString().split("T")[0];
 
+  const [selectedGame, setSelectedGame] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   useEffect(() => {
     const fetchGames = async () => {
       setIsLoading(true); // Start loading
       try {
-        const searchParam = searchQuery ? `&search=${searchQuery}` : "";
         // RAWG API
         const popularResponse = await axios.get(
           `https://api.rawg.io/api/games?key=32d80d72ca6b4f50836ace2da6d74fb8&dates=2023-01-01,2024-01-01&ordering=-rating`
@@ -79,6 +81,81 @@ const Home = ({ onLogout }) => {
     }
   };
 
+  function GameDetailsModal({ game, onClose }) {
+    const [mainImage, setMainImage] = useState("");
+    useEffect(() => {
+      // Set the initial mainImage when the game is first loaded
+      if (game && game.background_image) {
+        setMainImage(game.background_image);
+      }
+    }, [game]);
+    const addToFavourites = () => {
+      console.log("Adding to favourites:", game.name);
+      // Implement the logic to add the game to favourites here
+    };
+    const handleThumbnailClick = (imageUrl) => {
+      setMainImage(imageUrl);
+    };
+    if (!game) return null; // Don't render if there's no game data
+    return (
+      <div className="modal-backdrop">
+        <div className="modal-content">
+          <div className="modal-header">
+            <button className="close-button" onClick={onClose}>
+              ×
+            </button>
+          </div>
+          <div className="modal-body">
+            <img src={mainImage} alt={game.name} className="main-image" />
+            <div className="thumbnail-container">
+              {game.short_screenshots?.map((screenshot) => (
+                <img
+                  key={screenshot.id}
+                  src={screenshot.image}
+                  alt="Game Screenshot Thumbnail"
+                  onClick={() => handleThumbnailClick(screenshot.image)}
+                  className="thumbnail-image"
+                />
+              ))}
+            </div>
+            {/* The rest of your modal content goes here */}
+            <h3>{game.name}</h3>
+            <p>Release Date: {game.released}</p>
+            {/* Display more game details here */}
+            <p>Rating: {game.rating} / 10</p>
+            <p>Genres: {game.genres?.map((genre) => genre.name).join(", ")}</p>
+            <p>
+              Platforms:{" "}
+              {game.platforms
+                ?.map((platform) => platform.platform.name)
+                .join(", ")}
+            </p>
+          </div>
+          <div className="modal-footer">
+            <button
+              onClick={addToFavourites}
+              className="add-to-favourites-button"
+            >
+              Add to Favourites
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const openModal = (game) => {
+    setSelectedGame(game);
+    setIsModalOpen(true);
+    document.body.classList.add("active-modal"); // Prevent background scrolling
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedGame(null);
+    document.body.classList.remove("active-modal"); // Re-enable background scrolling
+  };
+
   return (
     <div className="home">
       <div className="sidebar">
@@ -110,7 +187,11 @@ const Home = ({ onLogout }) => {
             <h2>Search Results</h2>
             <div className="games-list">
               {searchedGames.map((game) => (
-                <div key={game.id} className="game">
+                <div
+                  key={game.id}
+                  className="game"
+                  onClick={() => openModal(game)}
+                >
                   <img src={game.background_image} alt={game.name} />
                   <h3>{game.name}</h3>
                   {/* Other game details */}
@@ -129,7 +210,11 @@ const Home = ({ onLogout }) => {
                   <div key={index} className="game loading-placeholder"></div>
                 ))
               : popularGames.map((game) => (
-                  <div key={game.id} className="game">
+                  <div
+                    key={game.id}
+                    className="game"
+                    onClick={() => openModal(game)}
+                  >
                     <img src={game.background_image} alt={game.name} />
                     <h3>{game.name}</h3>
                     {/* Other game details */}
@@ -157,7 +242,11 @@ const Home = ({ onLogout }) => {
                   <div key={index} className="game loading-placeholder"></div>
                 ))
               : newReleases.map((game) => (
-                  <div key={game.id} className="game">
+                  <div
+                    key={game.id}
+                    className="game"
+                    onClick={() => openModal(game)}
+                  >
                     <img src={game.background_image} alt={game.name} />
                     <h3>{game.name}</h3>
                     {/* Other game details */}
@@ -165,6 +254,9 @@ const Home = ({ onLogout }) => {
                 ))}
           </div>
         </div>
+        {isModalOpen && (
+          <GameDetailsModal game={selectedGame} onClose={closeModal} />
+        )}
       </div>
     </div>
   );
