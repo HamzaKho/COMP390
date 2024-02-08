@@ -412,6 +412,74 @@ app.get("/userFriends/:userId", (req, res) => {
   });
 });
 
+app.post("/addFavourite", (req, res) => {
+  const { loggedInUserId, gameId } = req.body;
+  console.log("Request Body:", req.body);
+  console.log("Received:", loggedInUserId, gameId);
+  if (!loggedInUserId || !gameId) {
+    return res
+      .status(400)
+      .json({ message: "User ID and game ID are required" });
+  }
+  const query = `
+  INSERT INTO user_favorites (user_id, game_id)
+  VALUES (?, ?)
+  ON DUPLICATE KEY UPDATE game_id = VALUES(game_id);`;
+  db.query(query, [loggedInUserId, gameId], (insertError, insertResults) => {
+    if (insertError) {
+      console.error("Database error while adding to favorites:", insertError);
+      return res.status(500).json({ message: "Database error", insertError });
+    }
+
+    if (insertResults.affectedRows === 0) {
+      // This scenario might occur if the insert operation doesn't change any data, e.g., attempting to insert a duplicate that is caught by the ON DUPLICATE KEY clause
+      console.log("Favorite game already added.");
+      return res.status(409).json({ message: "Favorite game already added" }); // 409 Conflict could be an appropriate response here
+    }
+
+    console.log(
+      `Game ID ${gameId} added to favorites for user ID ${loggedInUserId}`
+    );
+    return res
+      .status(200)
+      .json({ message: "Game added to favorites successfully" });
+  });
+});
+
+app.get("/isFavourite/:userId/:gameId", (req, res) => {
+  const { userId, gameId } = req.params;
+  const query = `SELECT 1 FROM user_favorites WHERE user_id = ? AND game_id = ? LIMIT 1;`;
+  db.query(query, [userId, gameId], (error, results) => {
+    if (error) {
+      console.error("Database error checking favourite:", error);
+      return res.status(500).json({ message: "Database error", error });
+    }
+    const isFavourite = results.length > 0;
+    return res.status(200).json({ isFavourite });
+  });
+});
+
+app.delete("/removeFavourite", (req, res) => {
+  const { loggedInUserId, gameId } = req.body;
+  const query = `DELETE FROM user_favorites WHERE user_id = ? AND game_id = ?;`;
+  db.query(query, [loggedInUserId, gameId], (error, results) => {
+    if (error) {
+      console.error("Database error removing favourite:", error);
+      return res.status(500).json({ message: "Database error", error });
+    }
+    if (results.affectedRows > 0) {
+      console.log(
+        `Game ID ${gameId} removed from favourites for user ID ${loggedInUserId}`
+      );
+      return res
+        .status(200)
+        .json({ message: "Game removed from favourites successfully" });
+    } else {
+      return res.status(404).json({ message: "Game not found in favourites" });
+    }
+  });
+});
+
 app.listen(8081, () => {
   console.log("Listening");
 });

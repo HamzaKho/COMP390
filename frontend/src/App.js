@@ -43,7 +43,7 @@ function App() {
           path="/"
           element={
             <PrivateRoute isLoggedIn={isLoggedIn}>
-              <Home onLogout={handleLogout} />
+              <Home onLogout={handleLogout} loggedInUserId={loggedInUserId} />
             </PrivateRoute>
           }
         />
@@ -51,8 +51,7 @@ function App() {
           path="/home"
           element={
             <PrivateRoute isLoggedIn={isLoggedIn}>
-              <Home onLogout={handleLogout} />{" "}
-              {/* Passing the logout function */}
+              <Home onLogout={handleLogout} loggedInUserId={loggedInUserId} />
             </PrivateRoute>
           }
         />

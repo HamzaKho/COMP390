@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import "./Home.css";
 
-const Home = ({ onLogout }) => {
+const Home = ({ onLogout, loggedInUserId }) => {
   const [popularGames, setPopularGames] = useState([]);
   const [newReleases, setNewReleases] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -11,7 +11,6 @@ const Home = ({ onLogout }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchedGames, setSearchedGames] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-
   const currentDate = new Date();
   const lastMonthDate = new Date(
     new Date().setMonth(currentDate.getMonth() - 1)
@@ -83,15 +82,64 @@ const Home = ({ onLogout }) => {
 
   function GameDetailsModal({ game, onClose }) {
     const [mainImage, setMainImage] = useState("");
+    const [isFavourite, setIsFavourite] = useState(false);
     useEffect(() => {
-      // Set the initial mainImage when the game is first loaded
+      fetch(`http://localhost:8081/isFavourite/${loggedInUserId}/${game.id}`)
+        .then((response) => response.json())
+        .then((data) => {
+          setIsFavourite(data.isFavourite);
+        })
+        .catch((error) => console.error("Error checking favourite:", error));
+
       if (game && game.background_image) {
         setMainImage(game.background_image);
       }
-    }, [game]);
-    const addToFavourites = () => {
+    }, [game, loggedInUserId]);
+    const addToFavourites = async () => {
       console.log("Adding to favourites:", game.name);
-      // Implement the logic to add the game to favourites here
+      console.log(loggedInUserId);
+      try {
+        const fetchResponse = await fetch(
+          "http://localhost:8081/addFavourite",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              loggedInUserId: loggedInUserId,
+              gameId: game.id,
+            }),
+          }
+        );
+        if (fetchResponse.ok) {
+          setIsFavourite(true); //update UI
+        } else {
+          console.log("Failed to add favourite");
+        }
+      } catch (error) {
+        console.error("Error adding favourite", error);
+      }
+    };
+    const removeFromFavourites = async () => {
+      // Implementation similar to `addToFavourites`, but using the DELETE method
+      fetch("http://localhost:8081/removeFavourite", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          loggedInUserId: loggedInUserId,
+          gameId: game.id,
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error("Failed to remove from favourites");
+          setIsFavourite(false); // Update UI to reflect the change
+        })
+        .catch((error) =>
+          console.error("Error removing from favourites:", error)
+        );
     };
     const handleThumbnailClick = (imageUrl) => {
       setMainImage(imageUrl);
@@ -122,7 +170,7 @@ const Home = ({ onLogout }) => {
             <h3>{game.name}</h3>
             <p>Release Date: {game.released}</p>
             {/* Display more game details here */}
-            <p>Rating: {game.rating} / 10</p>
+            <p>Rating: {game.rating} / 5</p>
             <p>Genres: {game.genres?.map((genre) => genre.name).join(", ")}</p>
             <p>
               Platforms:{" "}
@@ -133,10 +181,12 @@ const Home = ({ onLogout }) => {
           </div>
           <div className="modal-footer">
             <button
-              onClick={addToFavourites}
-              className="add-to-favourites-button"
+              onClick={isFavourite ? removeFromFavourites : addToFavourites}
+              className={`button-favourite ${
+                isFavourite ? "button-favourite-remove" : "button-favourite-add"
+              }`}
             >
-              Add to Favourites
+              {isFavourite ? "Remove from Favourites" : "Add to Favourites"}
             </button>
           </div>
         </div>
