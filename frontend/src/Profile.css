@@ -1,0 +1,56 @@
+.profile-container {
+    display: flex;
+    height: 100vh;
+    max-width: 100vw;
+    overflow-x: auto;
+  }
+  
+  .content {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  .user-info-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .username-display h4 {
+    margin: 0;
+    padding-bottom: 15px;
+  }
+  
+  .username-update {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .username-input, .update-button {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  .update-button {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .update-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .error {
+    color: #dc3545;
+    padding-top: 10px;
+  }
+  
+  .favourite-games-section h3 {
+    margin-top: 20px;
+  }
+  

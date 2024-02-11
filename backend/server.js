@@ -2,6 +2,7 @@ const express = require("express");
 const mysql = require("mysql");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
+const axios = require("axios");
 
 const app = express();
 app.use(cors());
@@ -97,6 +98,62 @@ app.post("/search", (req, res) => {
         return res.status(500).json({ message: "Database error", error });
       }
       return res.status(200).json(results);
+    }
+  );
+});
+
+app.get("/getUsername/:userId", (req, res) => {
+  const userId = req.params.userId;
+  const query = `SELECT username FROM users WHERE id = ?;`;
+
+  db.query(query, [userId], (error, results) => {
+    if (error) {
+      console.error("Database error:", error);
+      return res.status(500).json({ message: "Database error", error });
+    }
+    if (results.length > 0) {
+      const username = results[0].username;
+      return res.status(200).json({ username });
+    } else {
+      return res.status(404).json({ message: "User not found" });
+    }
+  });
+});
+
+app.post("/updateUsername/:userId", (req, res) => {
+  const userId = req.params.userId;
+  const { newUsername } = req.body;
+
+  // Check if the username is taken
+  db.query(
+    "SELECT id FROM users WHERE username = ?",
+    [newUsername],
+    (error, results) => {
+      if (error) {
+        return res
+          .status(500)
+          .json({ success: false, message: "Database error", error });
+      }
+      if (results.length > 0) {
+        return res.json({ success: false, message: "Username is taken." });
+      } else {
+        // Update the username
+        db.query(
+          "UPDATE users SET username = ? WHERE id = ?",
+          [newUsername, userId],
+          (error, results) => {
+            if (error) {
+              return res
+                .status(500)
+                .json({ success: false, message: "Database error", error });
+            }
+            return res.json({
+              success: true,
+              message: "Username updated successfully.",
+            });
+          }
+        );
+      }
     }
   );
 });
@@ -477,6 +534,43 @@ app.delete("/removeFavourite", (req, res) => {
     } else {
       return res.status(404).json({ message: "Game not found in favourites" });
     }
+  });
+});
+
+app.get("/getFavouriteGames/:userId", (req, res) => {
+  const loggedInUserId = req.params.userId;
+  const query = `SELECT game_id FROM user_favorites WHERE user_id = ?;`;
+  db.query(query, [loggedInUserId], async (error, results) => {
+    if (error) {
+      console.error("Database error finding favourites", error);
+      return res.status(500).json({ message: "Database error", error });
+    }
+    const favouriteGamesDetails = [];
+    for (const result of results) {
+      const gameId = result.game_id;
+      try {
+        const response = await axios.get(
+          `https://api.rawg.io/api/games/${gameId}?key=32d80d72ca6b4f50836ace2da6d74fb8`
+        ); // Fetch game details from RAWG API
+        // Extract the necessary game details from the response
+        const { name, background_image, released, rating, platforms } =
+          response.data;
+        const gameDetails = {
+          name,
+          background_image,
+          released,
+          rating,
+          platforms: platforms.map((platform) => platform.platform.name),
+        };
+        favouriteGamesDetails.push(gameDetails);
+      } catch (fetchError) {
+        console.error("Error fetching game details:", fetchError);
+        return res
+          .status(500)
+          .json({ message: "Error fetching game details", error: fetchError });
+      }
+    }
+    res.status(200).json({ favouriteGames: favouriteGamesDetails });
   });
 });
 

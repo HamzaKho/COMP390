@@ -8,6 +8,8 @@ const Home = ({ onLogout, loggedInUserId }) => {
   const [newReleases, setNewReleases] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRecommendationLoading, setIsRecommendationLoading] = useState(true);
+  const [recommendedGames, setRecommendedGames] = useState([]);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [searchedGames, setSearchedGames] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -144,6 +146,34 @@ const Home = ({ onLogout, loggedInUserId }) => {
     const handleThumbnailClick = (imageUrl) => {
       setMainImage(imageUrl);
     };
+    const fetchRecommendedGames = async (userId) => {
+      const data = {
+        user_id: userId,
+        ratings: [], // Your logic to define or get these ratings
+        item_to_predict: game.id, // The item ID you want to predict the rating for
+      };
+
+      try {
+        const response = await axios.post(
+          "http://localhost:5000/predict",
+          data
+        ); // Adjust the URL/port as necessary
+        if (response.data && response.data.predicted_rating) {
+          // Assuming the response contains the predicted rating,
+          // you can then fetch game details based on this rating or item ID.
+          // For demonstration, let's just log the predicted rating:
+          console.log("Predicted Rating:", response.data.predicted_rating);
+
+          // Here you would typically fetch the game details based on the item ID
+          // or use the rating in some way to recommend games.
+          // For now, let's assume you fetch and set recommended games accordingly:
+          // setRecommendedGames(fetchedGames);
+        }
+      } catch (error) {
+        console.error("Error fetching recommended games:", error);
+      }
+    };
+
     if (!game) return null; // Don't render if there's no game data
     return (
       <div className="modal-backdrop">
@@ -212,6 +242,7 @@ const Home = ({ onLogout, loggedInUserId }) => {
         {/* Other links */}
         <Link to="/">Home</Link>
         <Link to="/friends">Friends</Link>
+        <Link to="/profile">Profile</Link>
         <button onClick={onLogout} className="logout-button">
           Logout
         </button>

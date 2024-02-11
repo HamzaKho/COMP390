@@ -141,7 +141,6 @@ const Friends = ({ onLogout, loggedInUserId }) => {
       });
       if (response.ok) {
         console.log("Friend request sent successfully");
-        const newFriendRequest = await response.json();
         /*
         setSentRequests((prevRequests) => [...prevRequests, newFriendRequest]);
         setSearchResults((prevResults) =>
@@ -239,6 +238,7 @@ const Friends = ({ onLogout, loggedInUserId }) => {
         {/* Sidebar content */}
         <Link to="/">Home</Link>
         <Link to="/friends">Friends</Link>
+        <Link to="/profile">Profile</Link>
         <button onClick={onLogout} className="logout-button">
           Logout
         </button>
