@@ -9,6 +9,9 @@ const Profile = ({ onLogout, loggedInUserId }) => {
   const [username, setUsername] = useState("");
   const [newUsername, setNewUsername] = useState("");
   const [usernameError, setUsernameError] = useState("");
+  const [selectedGame, setSelectedGame] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   useEffect(() => {
     const fetchUsername = async () => {
       try {
@@ -23,6 +26,7 @@ const Profile = ({ onLogout, loggedInUserId }) => {
         console.error("Error retrieving username", error);
       }
     };
+
     const fetchFavouriteGames = async () => {
       try {
         const response = await fetch(
@@ -31,27 +35,62 @@ const Profile = ({ onLogout, loggedInUserId }) => {
         if (response.ok) {
           const data = await response.json();
           if (Array.isArray(data.favouriteGames)) {
-            setFavouriteGames(data.favouriteGames);
+            const gameDetailPromises = data.favouriteGames.map(
+              async (gameId) => {
+                const gameResponse = await fetch(
+                  `https://api.rawg.io/api/games/${gameId}?key=32d80d72ca6b4f50836ace2da6d74fb8`
+                );
+                if (!gameResponse.ok)
+                  throw new Error("Failed to fetch game details.");
+                return gameResponse.json();
+              }
+            );
+            const gamesDetails = await Promise.all(gameDetailPromises);
+            const transformedGamesDetails = gamesDetails.map((game) => ({
+              id: game.id,
+              name: game.name,
+              background_image: game.background_image,
+              released: game.released,
+              rating: game.rating,
+              platforms: game.platforms?.map((p) => p.platform.name),
+              thumbnails: game.short_screenshots?.map((ss) => ss.image),
+            }));
+
+            setFavouriteGames(transformedGamesDetails);
           } else {
             console.error("Received data is not an array", data.favouriteGames);
-            setFavouriteGames([]); // Reset the state or handle accordingly
+            setFavouriteGames([]);
           }
         } else {
-          console.error("Error fetching Favourite games", response.status);
+          console.error("Error fetching favourite games", response.status);
         }
       } catch (error) {
         console.error("Error retrieving favourite games", error);
       }
     };
+
     fetchUsername();
     fetchFavouriteGames();
   }, [loggedInUserId]);
+
+  const openModal = (game) => {
+    setSelectedGame(game);
+    setIsModalOpen(true);
+    document.body.classList.add("active-modal");
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedGame(null);
+    document.body.classList.remove("active-modal");
+  };
+
   const handleUsernameChange = (e) => {
     setNewUsername(e.target.value);
-    setUsernameError(""); // Reset error message
+    setUsernameError("");
   };
+
   const validateAndSubmitUsername = async () => {
-    // Validate for alphanumeric values
     if (!/^[a-zA-Z0-9]+$/.test(newUsername)) {
       setUsernameError("Username must be alphanumeric.");
       return;
@@ -80,6 +119,133 @@ const Profile = ({ onLogout, loggedInUserId }) => {
       setUsernameError("Failed to update username.");
     }
   };
+
+  function GameDetailsModal({ game, onClose }) {
+    const [mainImage, setMainImage] = useState(game?.background_image ?? "");
+    const [isFavourite, setIsFavourite] = useState(false);
+
+    useEffect(() => {
+      if (!game) return;
+
+      const checkFavouriteStatus = async () => {
+        try {
+          const response = await fetch(
+            `http://localhost:8081/isFavourite/${loggedInUserId}/${game.id}`
+          );
+          const data = await response.json();
+          setIsFavourite(data.isFavourite);
+        } catch (error) {
+          console.error("Error checking favourite:", error);
+        }
+      };
+
+      checkFavouriteStatus();
+    }, [game, loggedInUserId]);
+
+    const addToFavourites = async () => {
+      try {
+        const response = await fetch("http://localhost:8081/addFavourite", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            loggedInUserId,
+            gameId: game.id,
+          }),
+        });
+        if (response.ok) {
+          setIsFavourite(true);
+        }
+      } catch (error) {
+        console.error("Error adding to favourites:", error);
+      }
+    };
+
+    const removeFromFavourites = async () => {
+      try {
+        const response = await fetch("http://localhost:8081/removeFavourite", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            loggedInUserId,
+            gameId: game.id,
+          }),
+        });
+        if (response.ok) {
+          setIsFavourite(false);
+        }
+      } catch (error) {
+        console.error("Error removing from favourites:", error);
+      }
+    };
+
+    const handleThumbnailClick = (imageUrl) => {
+      setMainImage(imageUrl);
+    };
+
+    if (!game) return null;
+
+    return (
+      <div className="modal-backdrop">
+        <div className="modal-content">
+          <div className="modal-header">
+            <button className="close-button" onClick={onClose}>
+              ×
+            </button>
+          </div>
+          <div className="modal-body">
+            <img
+              src={game?.background_image}
+              alt={game?.name}
+              className="main-image"
+            />
+            <div className="thumbnail-container">
+              {game?.short_screenshots?.map((screenshot) => (
+                <img
+                  key={screenshot.id}
+                  src={screenshot.image}
+                  alt="Game Screenshot Thumbnail"
+                  onClick={() => setMainImage(screenshot.image)}
+                  className="thumbnail-image"
+                />
+              ))}
+            </div>
+            <div className="game-thumbnails">
+              {game.thumbnails &&
+                game.thumbnails
+                  .slice(0, 3)
+                  .map((thumbnail, thumbIndex) => (
+                    <img
+                      key={thumbIndex}
+                      src={thumbnail}
+                      alt={`Thumbnail ${thumbIndex + 1}`}
+                      className="game-thumbnail"
+                    />
+                  ))}
+            </div>
+            <h3>{game?.name}</h3>
+            <p>Release Date: {game?.released}</p>
+            <p>Rating: {game?.rating} / 5</p>
+            <p>
+              Genres:{" "}
+              {game?.genres?.map((genre) => genre.name).join(", ") || "N/A"}
+            </p>
+            <p>
+              Platforms:{" "}
+              {game?.platforms
+                ?.map((platform) => platform.platform?.name)
+                .join(", ") || "N/A"}
+            </p>
+          </div>
+          <div className="modal-footer">{/* Footer content */}</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="profile-container">
       <div className="sidebar">
@@ -119,21 +285,28 @@ const Profile = ({ onLogout, loggedInUserId }) => {
           ) : (
             <div className="games-list">
               {favouriteGames.map((game, index) => (
-                <div key={index} className="game">
+                <div
+                  key={index}
+                  className="game"
+                  onClick={() => openModal(game)}
+                >
                   <img
                     src={game.background_image}
                     alt={game.name}
                     className="game-image"
                   />
                   <h3>{game.name}</h3>
-                  {/* Additional game details can be added here */}
                 </div>
               ))}
             </div>
           )}
         </div>
+        {isModalOpen && (
+          <GameDetailsModal game={selectedGame} onClose={closeModal} />
+        )}
       </div>
     </div>
   );
 };
+
 export default Profile;

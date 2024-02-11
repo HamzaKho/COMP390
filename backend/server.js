@@ -545,32 +545,8 @@ app.get("/getFavouriteGames/:userId", (req, res) => {
       console.error("Database error finding favourites", error);
       return res.status(500).json({ message: "Database error", error });
     }
-    const favouriteGamesDetails = [];
-    for (const result of results) {
-      const gameId = result.game_id;
-      try {
-        const response = await axios.get(
-          `https://api.rawg.io/api/games/${gameId}?key=32d80d72ca6b4f50836ace2da6d74fb8`
-        ); // Fetch game details from RAWG API
-        // Extract the necessary game details from the response
-        const { name, background_image, released, rating, platforms } =
-          response.data;
-        const gameDetails = {
-          name,
-          background_image,
-          released,
-          rating,
-          platforms: platforms.map((platform) => platform.platform.name),
-        };
-        favouriteGamesDetails.push(gameDetails);
-      } catch (fetchError) {
-        console.error("Error fetching game details:", fetchError);
-        return res
-          .status(500)
-          .json({ message: "Error fetching game details", error: fetchError });
-      }
-    }
-    res.status(200).json({ favouriteGames: favouriteGamesDetails });
+    const gameIds = results.map((result) => result.game_id);
+    res.status(200).json({ favouriteGames: gameIds });
   });
 });
 
