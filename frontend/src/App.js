@@ -4,6 +4,7 @@ import Login from "./Login";
 import Signup from "./Signup";
 import Home from "./Home";
 import Friends from "./Friends";
+import Profile from "./Profile";
 import PrivateRoute from "./PrivateRoute";
 
 function App() {
@@ -66,7 +67,17 @@ function App() {
             </PrivateRoute>
           }
         />
-        {/* ...other routes... */}
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute isLoggedIn={isLoggedIn}>
+              <Profile
+                onLogout={handleLogout}
+                loggedInUserId={loggedInUserId}
+              />
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
