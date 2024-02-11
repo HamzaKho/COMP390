@@ -1,128 +1,103 @@
-.sidebar {
-    width: 125px; /* Adjust the width as needed */
-    background-color: #f0f0f0; /* Light grey background */
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Add some shadow for depth */
-  }
-  
-  .sidebar a {
-    display: block;
-    padding: 10px;
-    text-decoration: none;
-    color: black;
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
-  
-  .sidebar a:hover {
-    background-color: #ddd; /* Slight change on hover */
-  }
+.friends-container {
+  display: flex;
+  height: 100vh;
+  max-width: 100vw;
+  overflow-x: auto;
+}
 
-  .friends-container {
-    display: flex;
-  }
 .friends-page {
   flex-grow: 1;
-    font-family: Arial, sans-serif;
-    margin: 0 auto;
-    padding: 10px;
-  }
-  
-  .search-bar {
-    display: flex;
-    width: 100%;
-    margin-bottom: 20px;
-  }
-  
-  .search-bar input {
-    flex: 1;
-    padding: 10px;
-    margin-right: 5px;
-  }
-  
-  .search-bar button {
-    padding: 10px;
-  }
-
-
-  .search-result {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px; /* Adds space between each search result */
-  }
-
-  .search-result button {
-    background-color: #4CAF50; /* Green background color */
-    color: white;
-    border: none;
-    padding: 5px 10px; /* Adjust padding as needed */
-    margin-left: 10px; /* Adds space between the username and the button */
-    border-radius: 5px; /* Rounded corners */
-    cursor: pointer; /* Mouse cursor changes to pointer on hover */
-    font-size: 0.9rem;
-  }
-
-  .search-result button:hover {
-    background-color: #45a049; /* Darker shade of green on hover */
-  }
-
-  .no-results {
-    text-align: center;
-    margin-top: 20px;
-    color: #666; /* Example color */
-    font-style: italic;
-  }
-
-.green-button {
-    background-color:  #4CAF50;
-    color: white;
-  border: none; 
-  padding: 5px 10px; 
-  border-radius: 5px; 
-  cursor: pointer; 
-  margin-left: 10px;
-  box-shadow: none;
-  text-transform: lowercase;
+  font-family: Arial, sans-serif;
+  margin: 0 auto;
+  padding: 10px;
 }
-.green-button:hover{
+
+.search-bar {
+  display: flex;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.search-bar input {
+  flex: 1;
+  padding: 10px;
+  margin-right: 5px;
+}
+
+.search-bar button {
+  padding: 10px;
+}
+
+.search-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.search-result button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  margin-left: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.search-result button:hover {
   background-color: #45a049;
 }
-  
-.red-button {
-  background-color: rgb(248, 68, 68);
+
+.no-results {
+  text-align: center;
+  margin-top: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+.green-button, .red-button {
   color: white;
-  border: none; 
-  padding: 5px 10px; 
-  border-radius: 5px; 
-  cursor: pointer; 
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
   margin-left: 10px;
   box-shadow: none;
   text-transform: lowercase;
 }
-.red-button:hover {
-  background-color: #cc0000; /* Darker shade of red for the hover effect */
+
+.green-button {
+  background-color: #4CAF50;
 }
 
+.green-button:hover {
+  background-color: #45a049;
+}
 
-  .status-pending {
-    color: white;
-    background-color: orange;
-    margin-left: 10px;
-    display: inline-block;
+.red-button {
+  background-color: rgb(248, 68, 68);
+}
+
+.red-button:hover {
+  background-color: #cc0000;
+}
+
+.status-pending, .status-rejected {
+  color: white;
+  margin-left: 10px;
+  display: inline-block;
   padding: 5px 10px;
-  /*border: 1px solid orange;*/
   text-transform: lowercase;
   border-radius: 5px;
-  }
-  
-  .status-rejected {
-    color: white;
-    background-color: red;
-    margin-left: 10px;
-    display: inline-block;
-  padding: 5px 10px;
+}
+
+.status-pending {
+  background-color: orange;
+}
+
+.status-rejected {
+  background-color: red;
   border: 1px solid red;
-  border-radius: 5px;
-  }
-  
+}

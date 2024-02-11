@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import "./Home.css";
+import "./Sidebar.css";
+import "./Modal.css";
 
 const Home = ({ onLogout, loggedInUserId }) => {
   const [popularGames, setPopularGames] = useState([]);
@@ -173,7 +175,6 @@ const Home = ({ onLogout, loggedInUserId }) => {
         console.error("Error fetching recommended games:", error);
       }
     };
-
     if (!game) return null; // Don't render if there's no game data
     return (
       <div className="modal-backdrop">
@@ -235,7 +236,7 @@ const Home = ({ onLogout, loggedInUserId }) => {
     setSelectedGame(null);
     document.body.classList.remove("active-modal"); // Re-enable background scrolling
   };
-
+  console.log(isModalOpen);
   return (
     <div className="home">
       <div className="sidebar">

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./Profile.css";
+import "./Sidebar.css";
+import "./Modal.css";
 
 const Profile = ({ onLogout, loggedInUserId }) => {
   const [favouriteGames, setFavouriteGames] = useState([]);

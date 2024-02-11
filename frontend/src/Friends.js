@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Friends.css";
+import "./Sidebar.css";
 import { Link } from "react-router-dom";
 
 const Friends = ({ onLogout, loggedInUserId }) => {
