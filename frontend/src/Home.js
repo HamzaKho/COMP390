@@ -32,6 +32,7 @@ const Home = ({ onLogout, loggedInUserId }) => {
         // RAWG API
         const popularResponse = await axios.get(
           `https://api.rawg.io/api/games?key=32d80d72ca6b4f50836ace2da6d74fb8&dates=2023-01-01,2024-01-01&ordering=-rating`
+          //`https://api.rawg.io/api/games?key=32d80d72ca6b4f50836ace2da6d74fb8&ordering=-popularity`
         );
         const newReleasesResponse = await axios.get(
           `https://api.rawg.io/api/games?key=32d80d72ca6b4f50836ace2da6d74fb8&dates=${startDate},${endDate}&ordering=-added`
@@ -244,6 +245,7 @@ const Home = ({ onLogout, loggedInUserId }) => {
         <Link to="/">Home</Link>
         <Link to="/friends">Friends</Link>
         <Link to="/profile">Profile</Link>
+        <Link to="/gamerecommender">Game Recommender</Link>
         <button onClick={onLogout} className="logout-button">
           Logout
         </button>

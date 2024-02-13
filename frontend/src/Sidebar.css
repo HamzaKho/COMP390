@@ -1,8 +1,9 @@
 .sidebar {
-    width: 125px; /* Adjust the width as needed */
+    width: 10vw; /* Adjust the width as needed */
     background-color: #f0f0f0; /* Light grey background */
     padding: 20px;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Add some shadow for depth */
+    height: 100vh;
   }
   
   .sidebar a {

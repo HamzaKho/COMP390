@@ -240,6 +240,7 @@ const Friends = ({ onLogout, loggedInUserId }) => {
         <Link to="/">Home</Link>
         <Link to="/friends">Friends</Link>
         <Link to="/profile">Profile</Link>
+        <Link to="/gamerecommender">Game Recommender</Link>
         <button onClick={onLogout} className="logout-button">
           Logout
         </button>

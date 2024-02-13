@@ -52,8 +52,6 @@ const Profile = ({ onLogout, loggedInUserId }) => {
               background_image: game.background_image,
               released: game.released,
               rating: game.rating,
-              platforms: game.platforms?.map((p) => p.platform.name),
-              thumbnails: game.short_screenshots?.map((ss) => ss.image),
             }));
 
             setFavouriteGames(transformedGamesDetails);
@@ -252,6 +250,7 @@ const Profile = ({ onLogout, loggedInUserId }) => {
         <Link to="/">Home</Link>
         <Link to="/friends">Friends</Link>
         <Link to="/profile">Profile</Link>
+        <Link to="/gamerecommender">Game Recommender</Link>
         <button onClick={onLogout} className="logout-button">
           Logout
         </button>
