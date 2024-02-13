@@ -550,6 +550,38 @@ app.get("/getFavouriteGames/:userId", (req, res) => {
   });
 });
 
+// Corrected server route without URL parameters
+app.post("/addPreference", (req, res) => {
+  const { loggedInUserId, gameId, preference } = req.body;
+  const sqlQuery = `INSERT INTO user_game_preferences (user_id, game_id, preference) VALUES (?, ?, ?)`;
+
+  if (!loggedInUserId || !gameId) {
+    return res
+      .status(400)
+      .json({ message: "User ID and game ID are required" });
+  }
+
+  db.query(
+    sqlQuery,
+    [loggedInUserId, gameId, preference],
+    (insertError, insertResults) => {
+      if (insertError) {
+        return res.status(500).json({ message: "Database error", insertError });
+      }
+      if (insertResults.affectedRows === 0) {
+        return res
+          .status(409)
+          .json({
+            message: "Preference already added or error in adding preference.",
+          });
+      }
+      return res
+        .status(200)
+        .json({ message: "Game preference added successfully" });
+    }
+  );
+});
+
 app.listen(8081, () => {
   console.log("Listening");
 });

@@ -10,11 +10,11 @@
   .modal-content {
     display: flex;
     flex-direction: column;
-  align-items: center;
-  max-height: 90vh;
-  max-width: 60vw;
-  width: auto;
-  margin: auto;
+    align-items: center;
+    max-height: 90vh;
+    max-width: 60vw;
+    width: auto;
+    margin: auto;
   }
   
   .modal-body {

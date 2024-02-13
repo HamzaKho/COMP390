@@ -62,16 +62,55 @@ const GameRecommender = ({ onLogout, loggedInUserId }) => {
   };
 
   const handleLike = async () => {
-    // Placeholder for API call to like the current game
-    // Implement actual API call to update the user's preference
-    console.log("Liked", currentGame.id);
-    fetchNextGame(); // Fetch the next game after responding
+    console.log("Liking game:", currentGame.name);
+    console.log(loggedInUserId);
+    try {
+      const fetchResponse = await fetch("http://localhost:8081/addPreference", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          loggedInUserId: loggedInUserId,
+          gameId: currentGame.id,
+          preference: "like",
+        }),
+      });
+      if (fetchResponse.ok) {
+        console.log("Game liked successfully");
+        fetchNextGame();
+      } else {
+        console.log("Failed to like game");
+      }
+    } catch (error) {
+      console.error("Error liking game", error);
+    }
   };
 
   const handleDislike = async () => {
-    // Placeholder for API call to dislike the current game
-    console.log("Disliked", currentGame.id);
-    fetchNextGame(); // Fetch the next game after responding
+    console.log("Disliking game:", currentGame.name);
+    console.log(loggedInUserId);
+    try {
+      const fetchResponse = await fetch("http://localhost:8081/addPreference", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          loggedInUserId: loggedInUserId,
+          gameId: currentGame.id,
+          preference: "dislike",
+        }),
+      });
+      if (fetchResponse.ok) {
+        console.log("Game disliked successfully");
+        fetchNextGame();
+      } else {
+        console.log("Failed to like game");
+      }
+    } catch (error) {
+      console.error("Error liking game", error);
+    }
   };
 
   const handleSkip = async () => {
@@ -81,11 +120,41 @@ const GameRecommender = ({ onLogout, loggedInUserId }) => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="GameRecommender">
+        <div className="sidebar">
+          <Link to="/">Home</Link>
+          <Link to="/friends">Friends</Link>
+          <Link to="/profile">Profile</Link>
+          <Link to="/gamerecommender">Game Recommender</Link>
+          <button onClick={onLogout} className="logout-button">
+            Logout
+          </button>
+        </div>
+        <div className="game-display">
+          <h2>Loading...</h2>
+        </div>
+      </div>
+    );
   }
 
   if (!currentGame) {
-    return <div>No more games to recommend!</div>;
+    return (
+      <div className="GameRecommender">
+        <div className="sidebar">
+          <Link to="/">Home</Link>
+          <Link to="/friends">Friends</Link>
+          <Link to="/profile">Profile</Link>
+          <Link to="/gamerecommender">Game Recommender</Link>
+          <button onClick={onLogout} className="logout-button">
+            Logout
+          </button>
+        </div>
+        <div className="game-display">
+          <h2>No more games to display</h2>
+        </div>
+      </div>
+    );
   }
 
   return (
