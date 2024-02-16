@@ -550,7 +550,6 @@ app.get("/getFavouriteGames/:userId", (req, res) => {
   });
 });
 
-// Corrected server route without URL parameters
 app.post("/addPreference", (req, res) => {
   const { loggedInUserId, gameId, preference } = req.body;
   const sqlQuery = `INSERT INTO user_game_preferences (user_id, game_id, preference) VALUES (?, ?, ?)`;
@@ -569,17 +568,32 @@ app.post("/addPreference", (req, res) => {
         return res.status(500).json({ message: "Database error", insertError });
       }
       if (insertResults.affectedRows === 0) {
-        return res
-          .status(409)
-          .json({
-            message: "Preference already added or error in adding preference.",
-          });
+        return res.status(409).json({
+          message: "Preference already added or error in adding preference.",
+        });
       }
       return res
         .status(200)
         .json({ message: "Game preference added successfully" });
     }
   );
+});
+
+app.get("/userPreferences/:userId", (req, res) => {
+  const userId = req.params.userId;
+
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
+  const sqlQuery = `SELECT game_id FROM user_game_preferences WHERE user_id = ?`;
+
+  db.query(sqlQuery, [userId], (error, results) => {
+    if (error) {
+      return res.status(500).json({ message: "Database error", error });
+    }
+    return res.status(200).json(results.map((row) => row.game_id));
+  });
 });
 
 app.listen(8081, () => {

@@ -25,36 +25,52 @@ const GameRecommender = ({ onLogout, loggedInUserId }) => {
 
   const fetchNextGame = async () => {
     setLoading(true);
-    const page = Math.floor(Math.random() * 10) + 1; // Randomize the page to vary the pool of games
-    const apiUrl = `https://api.rawg.io/api/games?key=32d80d72ca6b4f50836ace2da6d74fb8&ordering=-popularity&page_size=10&page=${page}`;
-
     try {
+      const preferencesResponse = await axios.get(
+        `http://localhost:8081/userPreferences/${loggedInUserId}`
+      );
+      const preferredGameIds = preferencesResponse.data.map(
+        (preference) => preference.gameId
+      );
+
+      const page = Math.floor(Math.random() * 10) + 1; // Randomize the page to vary the pool of games
+      const apiUrl = `https://api.rawg.io/api/games?key=32d80d72ca6b4f50836ace2da6d74fb8&ordering=-popularity&page_size=10&page=${page}`;
+
       const response = await axios.get(apiUrl);
       if (
         response.status === 200 &&
         response.data &&
         response.data.results.length > 0
       ) {
-        // Select a random game from the fetched list
-        const randomIndex = Math.floor(
-          Math.random() * response.data.results.length
+        // Filter out seen games
+        const unregisteredGames = response.data.results.filter(
+          (game) => !preferredGameIds.includes(game.id)
         );
-        const game = response.data.results[randomIndex];
-        setCurrentGame({
-          id: game.id,
-          name: game.name,
-          image: game.background_image,
-          thumbnails: game.short_screenshots,
-          releaseDate: game.released,
-          genres: game.genres.map((genre) => genre.name),
-          platforms: game.platforms,
-        });
+        if (unregisteredGames.length > 0) {
+          // Select a random game
+          const randomIndex = Math.floor(
+            Math.random() * unregisteredGames.length
+          );
+          const game = unregisteredGames[randomIndex];
+          setCurrentGame({
+            id: game.id,
+            name: game.name,
+            image: game.background_image,
+            thumbnails: game.short_screenshots,
+            releaseDate: game.released,
+            genres: game.genres.map((genre) => genre.name),
+            platforms: game.platforms,
+          });
+        } else {
+          console.error("No new games to display");
+          setCurrentGame(null);
+        }
       } else {
         console.error("Failed to fetch games or no games found");
         setCurrentGame(null);
       }
     } catch (error) {
-      console.error("Error fetching games from RAWG API:", error);
+      console.error("Error fetching games or user preferences:", error);
       setCurrentGame(null);
     }
     setLoading(false);
