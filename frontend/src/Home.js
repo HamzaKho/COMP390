@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import "./Home.css";
+import "./Sidebar.css";
+import "./Modal.css";
 
 const Home = ({ onLogout, loggedInUserId }) => {
   const [popularGames, setPopularGames] = useState([]);
   const [newReleases, setNewReleases] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isRecommendationLoading, setIsRecommendationLoading] = useState(true);
+  const [isRecommendationLoading, setIsRecommendationLoading] = useState([]);
   const [recommendedGames, setRecommendedGames] = useState([]);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,6 +32,7 @@ const Home = ({ onLogout, loggedInUserId }) => {
         // RAWG API
         const popularResponse = await axios.get(
           `https://api.rawg.io/api/games?key=32d80d72ca6b4f50836ace2da6d74fb8&dates=2023-01-01,2024-01-01&ordering=-rating`
+          //`https://api.rawg.io/api/games?key=32d80d72ca6b4f50836ace2da6d74fb8&ordering=-popularity`
         );
         const newReleasesResponse = await axios.get(
           `https://api.rawg.io/api/games?key=32d80d72ca6b4f50836ace2da6d74fb8&dates=${startDate},${endDate}&ordering=-added`
@@ -40,6 +43,38 @@ const Home = ({ onLogout, loggedInUserId }) => {
       } catch (error) {
         console.error("Error fetching data from RAWG API", error);
       }
+
+      const fetchRecommendations = async () => {
+        if (loggedInUserId) {
+          setIsRecommendationLoading(true);
+          try {
+            const response = await axios.get(
+              `http://localhost:5000/recommendations/${loggedInUserId}`
+            );
+            const gameIds = response.data;
+            const gameDetailsPromises = gameIds.map((gameId) =>
+              axios.get(
+                `https://api.rawg.io/api/games/${gameId}?key=32d80d72ca6b4f50836ace2da6d74fb8`
+              )
+            );
+            const gameDetailsResponses = await Promise.all(gameDetailsPromises);
+            const detailedGames = gameDetailsResponses.map((response) => ({
+              id: response.data.id,
+              name: response.data.name,
+              background_image: response.data.background_image,
+              released: response.data.released,
+              rating: response.data.rating,
+              short_screenshots: response.data.short_screenshots,
+            }));
+            setRecommendedGames(detailedGames);
+          } catch (error) {
+            console.error("Error fetching recommendations", error);
+          }
+          setIsRecommendationLoading(false);
+        }
+      };
+
+      fetchRecommendations();
       setIsLoading(false); // End loading
     };
 
@@ -173,7 +208,6 @@ const Home = ({ onLogout, loggedInUserId }) => {
         console.error("Error fetching recommended games:", error);
       }
     };
-
     if (!game) return null; // Don't render if there's no game data
     return (
       <div className="modal-backdrop">
@@ -235,7 +269,6 @@ const Home = ({ onLogout, loggedInUserId }) => {
     setSelectedGame(null);
     document.body.classList.remove("active-modal"); // Re-enable background scrolling
   };
-
   return (
     <div className="home">
       <div className="sidebar">
@@ -243,6 +276,7 @@ const Home = ({ onLogout, loggedInUserId }) => {
         <Link to="/">Home</Link>
         <Link to="/friends">Friends</Link>
         <Link to="/profile">Profile</Link>
+        <Link to="/gamerecommender">Game Recommender</Link>
         <button onClick={onLogout} className="logout-button">
           Logout
         </button>
@@ -304,14 +338,28 @@ const Home = ({ onLogout, loggedInUserId }) => {
           </div>
         </div>
         <div className="games-section">
-          <h2>Our Picks For You</h2>
+          <h2>Recommended for You</h2>
           <div className="games-list">
             {isRecommendationLoading ? (
-              Array.from({ length: 10 }, (_, index) => (
+              Array.from({ length: 5 }, (_, index) => (
                 <div key={index} className="game loading-placeholder"></div>
               ))
+            ) : recommendedGames.length > 0 ? (
+              recommendedGames.map((game) => (
+                <div
+                  key={game.id}
+                  className="game"
+                  onClick={() => openModal(game)}
+                >
+                  <img src={game.background_image} alt={game.name} />
+                  <h3>{game.name}</h3>
+                </div>
+              ))
             ) : (
-              <p>Featured games go here.</p>
+              <p>
+                No recommendations available :/, try using "Games Recommender"
+                so we can learn your preferences!
+              </p>
             )}
           </div>
         </div>
@@ -330,7 +378,6 @@ const Home = ({ onLogout, loggedInUserId }) => {
                   >
                     <img src={game.background_image} alt={game.name} />
                     <h3>{game.name}</h3>
-                    {/* Other game details */}
                   </div>
                 ))}
           </div>

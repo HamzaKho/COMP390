@@ -5,6 +5,7 @@ import Signup from "./Signup";
 import Home from "./Home";
 import Friends from "./Friends";
 import Profile from "./Profile";
+import GameRecommender from "./GameRecommender";
 import PrivateRoute from "./PrivateRoute";
 
 function App() {
@@ -72,6 +73,17 @@ function App() {
           element={
             <PrivateRoute isLoggedIn={isLoggedIn}>
               <Profile
+                onLogout={handleLogout}
+                loggedInUserId={loggedInUserId}
+              />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/GameRecommender"
+          element={
+            <PrivateRoute isLoggedIn={isLoggedIn}>
+              <GameRecommender
                 onLogout={handleLogout}
                 loggedInUserId={loggedInUserId}
               />
