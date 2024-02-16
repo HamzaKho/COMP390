@@ -25,7 +25,6 @@ const GameRecommender = ({ onLogout, loggedInUserId }) => {
 
   const fetchNextGame = async () => {
     setLoading(true);
-    // Using the RAWG API to fetch popular games. Adjust the page size and ordering as needed.
     const page = Math.floor(Math.random() * 10) + 1; // Randomize the page to vary the pool of games
     const apiUrl = `https://api.rawg.io/api/games?key=32d80d72ca6b4f50836ace2da6d74fb8&ordering=-popularity&page_size=10&page=${page}`;
 
