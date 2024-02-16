@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import "./Friends.css";
 import "./Sidebar.css";
 import { Link } from "react-router-dom";
+import FriendModal from "./FriendModal";
 
 const Friends = ({ onLogout, loggedInUserId }) => {
   const [friendRequests, setFriendRequests] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
   const [userFriends, setUserFriends] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState(null);
   useEffect(() => {
     const fetchIncomingRequests = async () => {
       try {
@@ -231,6 +234,16 @@ const Friends = ({ onLogout, loggedInUserId }) => {
     }
   };
 
+  const openModal = (friend) => {
+    setSelectedFriend(friend);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedFriend(null);
+  };
+
   return (
     <div className="friends-container">
       {" "}
@@ -324,11 +337,15 @@ const Friends = ({ onLogout, loggedInUserId }) => {
             <p>No friends found</p>
           ) : (
             userFriends.map((friend) => {
-              // Add this console log to check the IDs
-              console.log("User Friends:", userFriends);
               return (
                 <div key={friend.id} className="friend">
                   {friend.friendUsername}
+                  <button
+                    className="green-button"
+                    onClick={() => openModal(friend)}
+                  >
+                    View Profile/Message
+                  </button>
                   <button
                     className="red-button"
                     onClick={() => {
@@ -344,6 +361,11 @@ const Friends = ({ onLogout, loggedInUserId }) => {
         </div>
         {/* Rest of the main content */}
       </div>
+      <FriendModal
+        isOpen={isModalOpen}
+        onRequestClose={closeModal}
+        friend={selectedFriend}
+      />
     </div>
   );
 };
