@@ -10,6 +10,9 @@ const Friends = ({ onLogout, loggedInUserId }) => {
   const [userFriends, setUserFriends] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [currentMessage, setCurrentMessage] = useState("");
+
   useEffect(() => {
     const fetchIncomingRequests = async () => {
       try {
@@ -252,6 +255,23 @@ const Friends = ({ onLogout, loggedInUserId }) => {
     setSelectedFriend(null);
   };
 
+  const handleSendMessage = async (event) => {
+    event.preventDefault();
+    const newMessage = {
+      id: Date.now().toString(),
+      text: currentMessage,
+      senderId: loggedInUserId,
+      timestamp: new Date().toISOString(),
+      // Add other relevant properties here
+    };
+
+    // send to backend
+
+    // For now, we'll just add the message to the local state
+    setMessages([...messages, newMessage]);
+    setCurrentMessage(""); // Clear the input after sending
+  };
+
   return (
     <div className="friends-container">
       {" "}
@@ -366,6 +386,30 @@ const Friends = ({ onLogout, loggedInUserId }) => {
               );
             })
           )}
+        </div>
+        <div className="messages-box">
+          <h3>Messages</h3>
+          <div className="messages-list">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`message ${
+                  message.senderId === loggedInUserId ? "sent" : "received"
+                }`}
+              >
+                {message.text}
+              </div>
+            ))}
+          </div>
+          <form className="send-message-form" onSubmit={handleSendMessage}>
+            <input
+              type="text"
+              placeholder="Enter message here..."
+              value={currentMessage}
+              onChange={(e) => setCurrentMessage(e.target.value)}
+            />
+            <button type="submit">Send</button>
+          </form>
         </div>
         {/* Rest of the main content */}
       </div>

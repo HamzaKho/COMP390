@@ -163,11 +163,10 @@ const FriendModal = ({ isOpen, onRequestClose, friend, loggedInUserId }) => {
       style={customStyles}
       contentLabel="Friend Detail Modal"
     >
-      <h2>{friend?.friendUsername || "Friend Details"}</h2>
-      <div>
-        <p>Instant messaging section placeholder</p>
-        {/* Implement the instant messaging UI here */}
-      </div>
+      <h2>
+        {friend?.friendUsername + "'s Favourite Games:" ||
+          "Friend's Favourite Games:"}
+      </h2>
       <div>
         {favoriteGames.length > 0 ? (
           <div className="games-list">
