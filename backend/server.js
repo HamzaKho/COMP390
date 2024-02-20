@@ -550,6 +550,27 @@ app.get("/getFavouriteGames/:userId", (req, res) => {
   });
 });
 
+app.get("/getFavouriteGamesFromUsername/:username", (req, res) => {
+  const username = req.params.username;
+  const findQuery = `SELECT id FROM users WHERE username = ?;`;
+  db.query(findQuery, [username], async (error, result) => {
+    if (error) {
+      console.error("Database error finding username", error);
+      return res.status(500).json({ message: "Database error", error });
+    }
+    const userId = result[0].id;
+    const query = `SELECT game_id FROM user_favorites WHERE user_id = ?;`;
+    db.query(query, [userId], async (error, results) => {
+      if (error) {
+        console.error("Database error finding favourites", error);
+        return res.status(500).json({ message: "Database error", error });
+      }
+      const gameIds = results.map((result) => result.game_id);
+      res.status(200).json({ favouriteGames: gameIds });
+    });
+  });
+});
+
 app.post("/addPreference", (req, res) => {
   const { loggedInUserId, gameId, preference } = req.body;
   const sqlQuery = `INSERT INTO user_game_preferences (user_id, game_id, preference) VALUES (?, ?, ?)`;

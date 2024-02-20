@@ -132,6 +132,15 @@ const Friends = ({ onLogout, loggedInUserId }) => {
       senderId: loggedInUserId,
       receiverId: friendId,
     });
+    const friendUsername = searchResults.find(
+      (user) => user.id === friendId
+    )?.username;
+    const optimisticRequest = {
+      id: Date.now().toString(),
+      receiverUsername: friendUsername,
+      status: "Pending",
+    };
+    setSentRequests((prevRequests) => [...prevRequests, optimisticRequest]);
     try {
       const response = await fetch("http://localhost:8081/sendFriendRequest", {
         method: "POST",
@@ -145,13 +154,11 @@ const Friends = ({ onLogout, loggedInUserId }) => {
       });
       if (response.ok) {
         console.log("Friend request sent successfully");
-        /*
-        setSentRequests((prevRequests) => [...prevRequests, newFriendRequest]);
+        setSentRequests((prevRequests) => [...prevRequests]);
         setSearchResults((prevResults) =>
           prevResults.filter((user) => user.id !== friendId)
         );
-        */
-        window.location.reload();
+        /*window.location.reload();*/
       } else {
         console.error("Failed to send friend request");
       }
@@ -235,6 +242,7 @@ const Friends = ({ onLogout, loggedInUserId }) => {
   };
 
   const openModal = (friend) => {
+    console.log("Opening modal for friend:", friend);
     setSelectedFriend(friend);
     setIsModalOpen(true);
   };
@@ -365,6 +373,7 @@ const Friends = ({ onLogout, loggedInUserId }) => {
         isOpen={isModalOpen}
         onRequestClose={closeModal}
         friend={selectedFriend}
+        loggedInUserId={loggedInUserId}
       />
     </div>
   );
