@@ -126,7 +126,7 @@
   align-self: flex-end;
 }
 
-.message-received {
-  background-color: grey;
+.message.received {
+  background-color: lightgray;
   align-self: flex-start;
 }

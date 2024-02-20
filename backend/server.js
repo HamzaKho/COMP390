@@ -120,6 +120,25 @@ app.get("/getUsername/:userId", (req, res) => {
   });
 });
 
+app.get("/getUserId/:username", (req, res) => {
+  const { username } = req.params; // Extract the username from the request parameters
+
+  const query = `SELECT id FROM users WHERE username = ? LIMIT 1;`; // Prepare your SQL query
+
+  db.query(query, [username], (error, results) => {
+    if (error) {
+      console.error("Database error finding user ID", error);
+      return res.status(500).json({ message: "Database error", error });
+    }
+
+    if (results.length > 0) {
+      res.status(200).json({ userId: results[0].id });
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  });
+});
+
 app.post("/updateUsername/:userId", (req, res) => {
   const userId = req.params.userId;
   const { newUsername } = req.body;
@@ -615,6 +634,76 @@ app.get("/userPreferences/:userId", (req, res) => {
     }
     return res.status(200).json(results.map((row) => row.game_id));
   });
+});
+
+app.get("/messages/:senderId/:receiverId", (req, res) => {
+  console.log(req.params);
+  const { senderId, receiverId } = req.params;
+  const query = `
+    SELECT * FROM messages 
+    WHERE 
+      (sender_id = ? AND receiver_id = ?) 
+      OR 
+      (sender_id = ? AND receiver_id = ?) 
+    ORDER BY timestamp ASC;
+  `;
+
+  db.query(
+    query,
+    [senderId, receiverId, receiverId, senderId],
+    (error, results) => {
+      if (error) {
+        console.error("Database error fetching messages", error);
+        return res.status(500).json({ message: "Database error", error });
+      }
+
+      // Send back the fetched messages
+      res.status(200).json(results);
+    }
+  );
+});
+
+app.post("/sendMessage", (req, res) => {
+  const { senderId, receiverId, text, timestamp } = req.body;
+
+  // Assuming your table column names match the variable names closely
+  const insertQuery = `
+    INSERT INTO messages (sender_id, receiver_id, message, timestamp)
+    VALUES (?, ?, ?, ?);
+  `;
+
+  db.query(
+    insertQuery,
+    [senderId, receiverId, text, timestamp],
+    (error, result) => {
+      if (error) {
+        console.error("Database error inserting message", error);
+        return res.status(500).json({ message: "Database error", error });
+      }
+      const fetchInsertedMessageQuery = `
+      SELECT * FROM messages WHERE message_id = ?;
+    `;
+      db.query(
+        fetchInsertedMessageQuery,
+        [result.insertId],
+        (error, result) => {
+          if (error) {
+            console.error("Database error fetching inserted message", error);
+            return res.status(500).json({ message: "Database error", error });
+          }
+
+          // Assuming the message is correctly fetched and you have the result
+          if (result.length > 0) {
+            res.status(200).json(result[0]);
+          } else {
+            res
+              .status(404)
+              .json({ message: "Message not found after insert." });
+          }
+        }
+      );
+    }
+  );
 });
 
 app.listen(8081, () => {
