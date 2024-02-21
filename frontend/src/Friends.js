@@ -247,7 +247,7 @@ const Friends = ({ onLogout, loggedInUserId }) => {
 
   const openModal = (friend) => {
     console.log("Opening modal for friend:", friend);
-    setSelectedFriend(friend);
+    setSelectedFriend(friend.friendUsername);
     setIsModalOpen(true);
   };
 
