@@ -492,34 +492,66 @@ app.post("/addFavourite", (req, res) => {
   const { loggedInUserId, gameId } = req.body;
   console.log("Request Body:", req.body);
   console.log("Received:", loggedInUserId, gameId);
+
   if (!loggedInUserId || !gameId) {
     return res
       .status(400)
       .json({ message: "User ID and game ID are required" });
   }
-  const query = `
-  INSERT INTO user_favorites (user_id, game_id)
-  VALUES (?, ?)
-  ON DUPLICATE KEY UPDATE game_id = VALUES(game_id);`;
-  db.query(query, [loggedInUserId, gameId], (insertError, insertResults) => {
-    if (insertError) {
-      console.error("Database error while adding to favorites:", insertError);
-      return res.status(500).json({ message: "Database error", insertError });
-    }
 
-    if (insertResults.affectedRows === 0) {
-      // This scenario might occur if the insert operation doesn't change any data, e.g., attempting to insert a duplicate that is caught by the ON DUPLICATE KEY clause
-      console.log("Favorite game already added.");
-      return res.status(409).json({ message: "Favorite game already added" }); // 409 Conflict could be an appropriate response here
-    }
+  // First, insert the game into user favorites
+  const favoriteQuery = `
+    INSERT INTO user_favorites (user_id, game_id)
+    VALUES (?, ?)
+    ON DUPLICATE KEY UPDATE game_id = VALUES(game_id);`;
 
-    console.log(
-      `Game ID ${gameId} added to favorites for user ID ${loggedInUserId}`
-    );
-    return res
-      .status(200)
-      .json({ message: "Game added to favorites successfully" });
-  });
+  db.query(
+    favoriteQuery,
+    [loggedInUserId, gameId],
+    (favoriteError, favoriteResults) => {
+      if (favoriteError) {
+        console.error(
+          "Database error while adding to favorites:",
+          favoriteError
+        );
+        return res
+          .status(500)
+          .json({ message: "Database error", favoriteError });
+      }
+
+      if (favoriteResults.affectedRows === 0) {
+        console.log("Favorite game already added.");
+        return res.status(409).json({ message: "Favorite game already added" });
+      }
+
+      console.log(
+        `Game ID ${gameId} added to favorites for user ID ${loggedInUserId}`
+      );
+
+      // Then, insert a 'like' preference
+      const preferenceQuery = `INSERT INTO user_game_preferences (user_id, game_id, preference) VALUES (?, ?, 'like')
+    ON DUPLICATE KEY UPDATE preference = VALUES(preference);`;
+
+      db.query(
+        preferenceQuery,
+        [loggedInUserId, gameId],
+        (preferenceError, preferenceResults) => {
+          if (preferenceError) {
+            console.error(
+              "Database error while adding preference:",
+              preferenceError
+            );
+            return res
+              .status(500)
+              .json({ message: "Database error", preferenceError });
+          }
+          return res.status(200).json({
+            message: "Game added to favorites and liked successfully",
+          });
+        }
+      );
+    }
+  );
 });
 
 app.get("/isFavourite/:userId/:gameId", (req, res) => {
@@ -632,7 +664,6 @@ app.get("/userPreferences/:userId", (req, res) => {
     if (error) {
       return res.status(500).json({ message: "Database error", error });
     }
-    console.log(results);
     return res.status(200).json(results.map((row) => row.game_id));
   });
 });
