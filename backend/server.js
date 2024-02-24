@@ -632,6 +632,7 @@ app.get("/userPreferences/:userId", (req, res) => {
     if (error) {
       return res.status(500).json({ message: "Database error", error });
     }
+    console.log(results);
     return res.status(200).json(results.map((row) => row.game_id));
   });
 });
