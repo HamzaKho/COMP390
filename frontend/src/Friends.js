@@ -10,6 +10,9 @@ const Friends = ({ onLogout, loggedInUserId }) => {
   const [userFriends, setUserFriends] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [currentMessage, setCurrentMessage] = useState("");
+
   useEffect(() => {
     const fetchIncomingRequests = async () => {
       try {
@@ -54,6 +57,7 @@ const Friends = ({ onLogout, loggedInUserId }) => {
         if (response.ok) {
           const data = await response.json();
           setUserFriends(data);
+          console.log(data);
         } else {
           console.error("Error fetching user's friends:", response.status);
         }
@@ -243,13 +247,103 @@ const Friends = ({ onLogout, loggedInUserId }) => {
 
   const openModal = (friend) => {
     console.log("Opening modal for friend:", friend);
-    setSelectedFriend(friend);
+    setSelectedFriend(friend.friendUsername);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedFriend(null);
+  };
+
+  const handleSelectFriend = (friendUsername) => {
+    console.log("Selected friend: " + friendUsername);
+    setSelectedFriend(friendUsername);
+    fetchMessages(loggedInUserId, friendUsername);
+  };
+
+  const fetchMessages = async (senderId, receiverUsername) => {
+    try {
+      // Fetch receiver ID
+      const receiverResponse = await fetch(
+        `http://localhost:8081/getUserId/${receiverUsername}`
+      );
+      const receiverData = await receiverResponse.json();
+      if (!receiverResponse.ok) throw new Error("Failed to fetch receiver ID");
+      const receiverId = receiverData.userId;
+
+      // Fetch the messages
+      const messagesResponse = await fetch(
+        `http://localhost:8081/messages/${senderId}/${receiverId}`
+      );
+      if (messagesResponse.ok) {
+        const data = await messagesResponse.json();
+        setMessages(data); // Set fetched messages to state
+      } else {
+        console.error("Failed to fetch messages");
+      }
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  };
+
+  const handleSendMessage = async (event) => {
+    event.preventDefault();
+
+    // Check if selectedFriend is defined and has a username
+    if (!selectedFriend) {
+      console.error("Selected friend or username is undefined.");
+      return; // Exit the function if no selectedFriend or username is provided
+    }
+
+    try {
+      // Fetch the friend's user ID based on the username
+      const userIdResponse = await fetch(
+        `http://localhost:8081/getUserId/${selectedFriend}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (userIdResponse.ok) {
+        const { userId } = await userIdResponse.json();
+
+        // Construct the new message with the retrieved userId as receiverId
+        const newMessage = {
+          id: Date.now().toString(), //temp id
+          text: currentMessage,
+          senderId: loggedInUserId,
+          receiverId: userId, // Use the retrieved userId
+          timestamp: new Date().toISOString(),
+        };
+
+        const response = await fetch("http://localhost:8081/sendMessage", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newMessage),
+        });
+
+        if (response.ok) {
+          const savedMessage = await response.json();
+          setMessages((prevMessages) => [...prevMessages, savedMessage]);
+          setCurrentMessage("");
+        } else {
+          console.error("Failed to send message", await response.text());
+        }
+      } else {
+        console.error(
+          "Failed to fetch user ID for the selected friend",
+          await userIdResponse.text()
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching user ID or sending message:", error);
+    }
   };
 
   return (
@@ -352,7 +446,13 @@ const Friends = ({ onLogout, loggedInUserId }) => {
                     className="green-button"
                     onClick={() => openModal(friend)}
                   >
-                    View Profile/Message
+                    View Profile
+                  </button>
+                  <button
+                    className="message-button"
+                    onClick={() => handleSelectFriend(friend.friendUsername)}
+                  >
+                    View Messages
                   </button>
                   <button
                     className="red-button"
@@ -367,6 +467,32 @@ const Friends = ({ onLogout, loggedInUserId }) => {
             })
           )}
         </div>
+        {selectedFriend && (
+          <div className="messages-box">
+            <h3>Messages with {selectedFriend} </h3>
+            <div className="messages-list">
+              {messages.map((message) => (
+                <div
+                  key={message.message_id}
+                  className={`message ${
+                    message.sender_id == loggedInUserId ? "sent" : "received"
+                  }`}
+                >
+                  {message.message}
+                </div>
+              ))}
+            </div>
+            <form className="send-message-form" onSubmit={handleSendMessage}>
+              <input
+                type="text"
+                placeholder="Enter message here..."
+                value={currentMessage}
+                onChange={(e) => setCurrentMessage(e.target.value)}
+              />
+              <button type="submit">Send</button>
+            </form>
+          </div>
+        )}
         {/* Rest of the main content */}
       </div>
       <FriendModal

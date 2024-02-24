@@ -114,14 +114,14 @@ const FriendModal = ({ isOpen, onRequestClose, friend, loggedInUserId }) => {
 
   useEffect(() => {
     if (isOpen && friend) {
-      fetchFavoriteGames(friend.id);
+      fetchFavoriteGames(friend);
     }
   }, [isOpen, friend]);
 
   const fetchFavoriteGames = async (friendId) => {
     try {
       const response = await fetch(
-        `http://localhost:8081/getFavouriteGamesFromUsername/${friend.friendUsername}`
+        `http://localhost:8081/getFavouriteGamesFromUsername/${friend}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -163,11 +163,7 @@ const FriendModal = ({ isOpen, onRequestClose, friend, loggedInUserId }) => {
       style={customStyles}
       contentLabel="Friend Detail Modal"
     >
-      <h2>{friend?.friendUsername || "Friend Details"}</h2>
-      <div>
-        <p>Instant messaging section placeholder</p>
-        {/* Implement the instant messaging UI here */}
-      </div>
+      <h2>{friend + "'s Favourite Games:" || "Friend's Favourite Games:"}</h2>
       <div>
         {favoriteGames.length > 0 ? (
           <div className="games-list">
