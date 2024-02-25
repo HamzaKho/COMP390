@@ -120,6 +120,7 @@ const Home = ({ onLogout, loggedInUserId }) => {
   function GameDetailsModal({ game, onClose }) {
     const [mainImage, setMainImage] = useState("");
     const [isFavourite, setIsFavourite] = useState(false);
+    const [showReviews, setShowReviews] = useState(false);
     useEffect(() => {
       fetch(`http://localhost:8081/isFavourite/${loggedInUserId}/${game.id}`)
         .then((response) => response.json())
@@ -208,6 +209,154 @@ const Home = ({ onLogout, loggedInUserId }) => {
         console.error("Error fetching recommended games:", error);
       }
     };
+
+    const toggleReviewsModal = () => {
+      setShowReviews(!showReviews);
+    };
+
+    function ReviewsModal({ game, onClose }) {
+      const [starRating, setStarRating] = useState(0);
+      const [reviewText, setReviewText] = useState("");
+      const [reviews, setReviews] = useState([]);
+      const [isSubmitting, setIsSubmitting] = useState(false);
+      const [viewingReviews, setViewingReviews] = useState(true);
+
+      const fetchReviews = async () => {
+        try {
+          const reviewsResponse = await axios.get(
+            `http://localhost:8081/reviews/${game.id}`
+          );
+          const reviewsWithUsernames = await Promise.all(
+            reviewsResponse.data.map(async (review) => {
+              const usernameResponse = await axios.get(
+                `http://localhost:8081/getUsername/${review.user_id}`
+              );
+              return { ...review, username: usernameResponse.data.username };
+            })
+          );
+          setReviews(reviewsWithUsernames);
+        } catch (error) {
+          console.error("Error fetching reviews:", error);
+        }
+      };
+
+      useEffect(() => {
+        fetchReviews();
+      }, [game.id]);
+
+      const handleRatingChange = (e) => {
+        setStarRating(e.target.value);
+      };
+
+      const handleReviewChange = (e) => {
+        setReviewText(e.target.value);
+      };
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        try {
+          const response = await axios.post(
+            "http://localhost:8081/postReview",
+            {
+              game_id: game.id,
+              user_id: loggedInUserId,
+              star_rating: starRating,
+              review_text: reviewText,
+            }
+          );
+
+          if (response.status === 200) {
+            console.log("Review posted successfully");
+            fetchReviews(); // Refresh the reviews list
+            setReviewText(""); // Clear the form
+            setStarRating(0); // Reset the rating
+            setViewingReviews(true); // Switch to viewing reviews after posting
+          } else {
+            console.error("Failed to post review", response.data);
+          }
+        } catch (error) {
+          console.error("Error submitting review", error);
+        } finally {
+          setIsSubmitting(false);
+        }
+      };
+
+      return (
+        <div className="reviews-modal-backdrop">
+          <div className="reviews-modal-content">
+            <button onClick={onClose} className="close-button">
+              ×
+            </button>
+            <div className="reviews-modal-header">
+              <h3>
+                {viewingReviews ? "Reviews" : `Post a Review for ${game.name}`}
+              </h3>
+              <button
+                onClick={() => setViewingReviews(!viewingReviews)}
+                className="view-toggle-button"
+              >
+                {viewingReviews ? "Post Review" : "View Reviews"}
+              </button>
+            </div>
+            {viewingReviews ? (
+              <div className="reviews-list">
+                {reviews.length > 0 ? (
+                  reviews.map((review) => (
+                    <div key={review.review_id} className="review-item">
+                      <div className="review-user">
+                        Reviewed by: {review.username}
+                      </div>
+                      <div className="review-rating">
+                        Rating: {review.star_rating} stars
+                      </div>
+                      <div className="review-text">{review.review_text}</div>
+                    </div>
+                  ))
+                ) : (
+                  <p>No reviews yet.</p>
+                )}
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="review-form">
+                <div className="reviews-modal-body">
+                  <div>
+                    <label>Star Rating:</label>
+                    <select
+                      value={starRating}
+                      onChange={handleRatingChange}
+                      required
+                    >
+                      <option value="">Select a rating</option>
+                      {[1, 2, 3, 4, 5].map((rating) => (
+                        <option key={rating} value={rating}>
+                          {rating}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label>Review:</label>
+                    <textarea
+                      value={reviewText}
+                      onChange={handleReviewChange}
+                      required
+                    ></textarea>
+                  </div>
+                </div>
+                <div className="reviews-modal-footer">
+                  <button type="submit" disabled={isSubmitting}>
+                    Post Review
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     if (!game) return null; // Don't render if there's no game data
     return (
       <div className="modal-backdrop">
@@ -252,8 +401,14 @@ const Home = ({ onLogout, loggedInUserId }) => {
             >
               {isFavourite ? "Remove from Favourites" : "Add to Favourites"}
             </button>
+            <button onClick={toggleReviewsModal} className="button-reviews">
+              Reviews
+            </button>
           </div>
         </div>
+        {showReviews && (
+          <ReviewsModal game={game} onClose={toggleReviewsModal} />
+        )}
       </div>
     );
   }
