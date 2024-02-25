@@ -75,13 +75,16 @@
     background: #a72016;
   }
   
-  .button-favourite, .button-favourite-add, .button-favourite-remove {
+  .button-favourite, .button-favourite-add, .button-favourite-remove, .button-reviews {
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
     border: none;
     border-radius: 5px;
     margin-top: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    padding: 10px;
   }
   
   .button-favourite-add {
@@ -97,3 +100,140 @@
   .button-favourite:hover {
     opacity: 0.8;
   }
+
+  .button-reviews{
+    background-color:rgb(10, 105, 237);
+    color: white;
+  }
+
+  .button-reviews:hover{
+    opacity: 0.8;
+  }
+
+  .reviews-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .reviews-modal-content {
+    position: relative;
+    background-color: #fff;
+    padding: 40px;
+    padding-top: 30px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 500px;
+  }
+  
+  .reviews-modal-header,
+  .reviews-modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .reviews-modal-header h3 {
+    margin: 0;
+  }
+  
+  .reviews-modal-body {
+    margin-bottom: 20px;
+  }
+  
+  .reviews-modal-body label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  .reviews-modal-body select,
+  .reviews-modal-body textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .reviews-modal-body textarea {
+    height: 100px;
+    resize: vertical; 
+  }
+  
+  button[type="submit"] {
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  
+  button[type="submit"]:disabled {
+    background-color: #cccccc;
+  }
+  
+  .reviews-modal-body select:focus,
+  .reviews-modal-body textarea:focus {
+    border-color: #007bff;
+    outline: none; 
+  }
+  
+  .view-toggle-button {
+    margin-left: auto;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  .reviews-list {
+    margin-top: 20px;
+  }
+  
+  .review-item {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .review-rating, .review-text {
+    margin-top: 5px;
+  }
+
+  .reviews-list {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .review-item {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    background-color: #f9f9f9;
+  }
+  
+  .review-user {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .review-rating, .review-text {
+    margin-top: 5px;
+  }
+  
