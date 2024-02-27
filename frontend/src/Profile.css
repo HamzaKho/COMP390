@@ -54,3 +54,31 @@
     margin-top: 20px;
   }
   
+  .review-box {
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center; 
+  }
+  
+  .review-game-image {
+    height: 20vh; 
+    width: auto; 
+    margin-right: 10px;
+  }
+  
+  .reviews-section {
+    max-height: 25vh;
+  }
+  
+  .reviews-list {
+    overflow-y: auto;
+  }
+  
+  .review-text-container {
+    flex: 1; 
+  }
+  
