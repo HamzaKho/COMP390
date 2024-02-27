@@ -11,6 +11,7 @@ const Profile = ({ onLogout, loggedInUserId }) => {
   const [usernameError, setUsernameError] = useState("");
   const [selectedGame, setSelectedGame] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
     const fetchUsername = async () => {
@@ -66,7 +67,37 @@ const Profile = ({ onLogout, loggedInUserId }) => {
         console.error("Error retrieving favourite games", error);
       }
     };
-
+    const fetchReviews = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8081/userReviews/${loggedInUserId}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          const reviewsWithGameDetails = await Promise.all(
+            data.map(async (review) => {
+              const gameResponse = await fetch(
+                `https://api.rawg.io/api/games/${review.game_id}?key=32d80d72ca6b4f50836ace2da6d74fb8`
+              );
+              if (!gameResponse.ok)
+                throw new Error("Failed to fetch game details.");
+              const gameData = await gameResponse.json();
+              return {
+                ...review,
+                gameName: gameData.name,
+                gameImage: gameData.background_image,
+              };
+            })
+          );
+          setReviews(reviewsWithGameDetails);
+        } else {
+          console.error("error getting reviews", response.status);
+        }
+      } catch (error) {
+        console.error("error fetching reviews", error);
+      }
+    };
+    fetchReviews();
     fetchUsername();
     fetchFavouriteGames();
   }, [loggedInUserId]);
@@ -89,6 +120,7 @@ const Profile = ({ onLogout, loggedInUserId }) => {
   };
 
   const validateAndSubmitUsername = async () => {
+    // Validate for alphanumeric values
     if (!/^[a-zA-Z0-9]+$/.test(newUsername)) {
       setUsernameError("Username must be alphanumeric.");
       return;
@@ -295,6 +327,32 @@ const Profile = ({ onLogout, loggedInUserId }) => {
                     className="game-image"
                   />
                   <h3>{game.name}</h3>
+                  {/* Additional game details can be added here */}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="reviews-section">
+          <h3>Your Reviews:</h3>
+          {reviews.length === 0 ? (
+            <p>You haven't left any reviews yet!</p>
+          ) : (
+            <div className="reviews-list">
+              {reviews.map((review, index) => (
+                <div key={index} className="review">
+                  <div className="review-box">
+                    <img
+                      src={review.gameImage}
+                      alt={review.gameName}
+                      className="review-game-image"
+                    />
+                    <div className="review-text-container">
+                      <h4>{review.gameName}</h4>
+                      <h5>{review.star_rating}/5 stars</h5>
+                      <p>{review.review_text}</p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
