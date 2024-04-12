@@ -1,0 +1,65 @@
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0; /* Soft background similar to the profile's sidebar */
+}
+
+.login-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    width: 300px; /* Fixed width similar to the sidebar */
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.label, .text-input, .submit-button, .alt-link {
+    display: block;
+    width: 100%;
+}
+
+.text-input {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.submit-button, .alt-link {
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    text-decoration: none;
+    color: white;
+    margin-top: 10px;
+}
+
+.submit-button {
+    background-color: #4CAF50 !important;
+    border: none;
+    cursor: pointer;
+}
+
+.submit-button:hover {
+    background-color: #45a049 !important; 
+}
+
+.alt-link {
+    background-color: #ccc;
+    display: inline-block;
+    color: black;
+    border: 1px solid #ccc;
+}
+
+.alt-link:hover {
+    background-color: #bbb;
+}
+
+.error {
+    color: #dc3545;
+    padding-top: 5px;
+}
