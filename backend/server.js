@@ -545,6 +545,7 @@ app.post("/addFavourite", (req, res) => {
               .status(500)
               .json({ message: "Database error", preferenceError });
           }
+          console.log(`Game ID ${gameId} liked for user ID ${loggedInUserId}`);
           return res.status(200).json({
             message: "Game added to favorites and liked successfully",
           });
