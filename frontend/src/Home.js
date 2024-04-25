@@ -19,9 +19,12 @@ const Home = ({ onLogout, loggedInUserId }) => {
   const lastMonthDate = new Date(
     new Date().setMonth(currentDate.getMonth() - 1)
   );
+  const lastYearDate = new Date(
+    new Date().setFullYear(currentDate.getFullYear() - 1)
+  );
   const endDate = currentDate.toISOString().split("T")[0];
   const startDate = lastMonthDate.toISOString().split("T")[0];
-
+  const startPopDate = lastYearDate.toISOString().split("T")[0];
   const [selectedGame, setSelectedGame] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -31,8 +34,7 @@ const Home = ({ onLogout, loggedInUserId }) => {
       try {
         // RAWG API
         const popularResponse = await axios.get(
-          `https://api.rawg.io/api/games?key=32d80d72ca6b4f50836ace2da6d74fb8&dates=2023-01-01,2024-01-01&ordering=-rating`
-          //`https://api.rawg.io/api/games?key=32d80d72ca6b4f50836ace2da6d74fb8&ordering=-popularity`
+          `https://api.rawg.io/api/games?key=32d80d72ca6b4f50836ace2da6d74fb8&dates=${startPopDate},${endDate}&ordering=-rating`
         );
         const newReleasesResponse = await axios.get(
           `https://api.rawg.io/api/games?key=32d80d72ca6b4f50836ace2da6d74fb8&dates=${startDate},${endDate}&ordering=-added`
@@ -182,34 +184,6 @@ const Home = ({ onLogout, loggedInUserId }) => {
     const handleThumbnailClick = (imageUrl) => {
       setMainImage(imageUrl);
     };
-    const fetchRecommendedGames = async (userId) => {
-      const data = {
-        user_id: userId,
-        ratings: [], // Your logic to define or get these ratings
-        item_to_predict: game.id, // The item ID you want to predict the rating for
-      };
-
-      try {
-        const response = await axios.post(
-          "http://localhost:5000/predict",
-          data
-        ); // Adjust the URL/port as necessary
-        if (response.data && response.data.predicted_rating) {
-          // Assuming the response contains the predicted rating,
-          // you can then fetch game details based on this rating or item ID.
-          // For demonstration, let's just log the predicted rating:
-          console.log("Predicted Rating:", response.data.predicted_rating);
-
-          // Here you would typically fetch the game details based on the item ID
-          // or use the rating in some way to recommend games.
-          // For now, let's assume you fetch and set recommended games accordingly:
-          // setRecommendedGames(fetchedGames);
-        }
-      } catch (error) {
-        console.error("Error fetching recommended games:", error);
-      }
-    };
-
     const toggleReviewsModal = () => {
       setShowReviews(!showReviews);
     };
@@ -379,10 +353,9 @@ const Home = ({ onLogout, loggedInUserId }) => {
                 />
               ))}
             </div>
-            {/* The rest of your modal content goes here */}
+            {/* Display game details */}
             <h3>{game.name}</h3>
             <p>Release Date: {game.released}</p>
-            {/* Display more game details here */}
             <p>Rating: {game.rating} / 5</p>
             <p>Genres: {game.genres?.map((genre) => genre.name).join(", ")}</p>
             <p>
@@ -487,7 +460,6 @@ const Home = ({ onLogout, loggedInUserId }) => {
                   >
                     <img src={game.background_image} alt={game.name} />
                     <h3>{game.name}</h3>
-                    {/* Other game details */}
                   </div>
                 ))}
           </div>

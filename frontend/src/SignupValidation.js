@@ -19,7 +19,7 @@ function Validation(values) {
     error.password = "";
   }
   if (values.confirmPassword === "") {
-    error.confirmPassword = "Please confirm your password";
+    error.confirmPassword = "Confirm password shouldn't be empty";
   } else if (values.confirmPassword !== values.password) {
     error.confirmPassword = "Passwords do not match!";
   } else {
