@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "./LoginValidation";
 import axios from "axios";
+import "./Login.css";
+
 function Login(props) {
   const [values, setValues] = useState({
     username: "",
@@ -41,45 +43,41 @@ function Login(props) {
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center bg-primary vh-100">
-      <div className="bg-white p-3 rounded w-25">
+    <div className="login-container">
+      <div className="login-content">
         <h2>Sign In</h2>
-        <form action="" onSubmit={handleSubmit}>
-          <div className="mb-3">
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
             <label htmlFor="username">Username:</label>
             <input
               type="username"
               placeholder="Enter Username"
               name="username"
               onChange={handleInput}
-              className="form-control rounded-0"
+              className="text-input"
             />
             {errors.username && (
-              <span className="text-danger">{errors.username}</span>
+              <span className="error">{errors.username}</span>
             )}
           </div>
-          <div className="mb-3">
+          <div className="input-group">
             <label htmlFor="password">Password:</label>
             <input
               type="password"
               placeholder="Enter Password"
               name="password"
               onChange={handleInput}
-              className="form-control rounded-0"
+              className="text-input"
             />
             {errors.password && (
-              <span className="text-danger">{errors.password}</span>
+              <span className="error">{errors.password}</span>
             )}
           </div>
-          {loginError && <span className="text-danger">{loginError}</span>}
-          <button type="submit" className="btn btn-success w-100">
+          {loginError && <span className="error">{loginError}</span>}
+          <button type="submit" className="submit-button">
             Login
           </button>
-          <p></p>
-          <Link
-            to="/signup"
-            className="btn btn-default border w-100 text-decoration-none"
-          >
+          <Link to="/signup" className="alt-link">
             Create Account
           </Link>
         </form>

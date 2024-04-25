@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "./SignupValidation";
 import axios from "axios";
+import "./Login.css";
 
 function Signup() {
   const [values, setValues] = useState({
@@ -30,7 +31,7 @@ function Signup() {
       axios
         .post("http://localhost:8081/signup", values)
         .then((res) => {
-          navigate("/");
+          navigate("/"); // Redirect to home or login page on successful sign up
         })
         .catch((err) => {
           if (err.response) {
@@ -41,77 +42,62 @@ function Signup() {
         });
     }
   };
+
   return (
-    <div className="d-flex justify-content-center align-items-center bg-primary vh-100">
-      <div className="bg-white p-3 rounded w-25">
+    <div className="login-container">
+      <div className="login-content">
         <h2>Sign-Up</h2>
-        <form action="" onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label htmlFor="username">
-              <strong>Username</strong>
-            </label>
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <label htmlFor="username">Username:</label>
             <input
               type="text"
               placeholder="Enter Username"
               name="username"
               onChange={handleInput}
-              className="form-control rounded-0"
+              className="text-input"
             />
             {errors.username && (
-              <span className="text-danger"> {errors.username}</span>
+              <span className="error"> {errors.username}</span>
             )}
           </div>
-          <div className="mb-3">
-            <label htmlFor="password">
-              <strong>Password</strong>
-            </label>
+          <div className="input-group">
+            <label htmlFor="password">Password:</label>
             <input
               type="password"
               placeholder="Enter Password"
               name="password"
               onChange={handleInput}
-              className="form-control rounded-0"
+              className="text-input"
             />
-            {errors.password && Array.isArray(errors.password) ? (
-              <div className="text-danger">
-                {errors.password.map((line, index) => (
-                  <div key={index}>{line}</div>
-                ))}
-              </div>
-            ) : (
-              <span className="text-danger">{errors.password}</span>
+            {errors.password && (
+              <span className="error">{errors.password}</span>
             )}
           </div>
-          <div className="mb-3">
-            <label htmlFor="comfirm password">
-              <strong>Confirm Password</strong>
-            </label>
+          <div className="input-group">
+            <label htmlFor="confirmPassword">Confirm Password:</label>
             <input
               type="password"
               placeholder="Re-enter Password"
               name="confirmPassword"
               onChange={handleInput}
-              className="form-control rounded-0"
+              className="text-input"
             />
             {errors.confirmPassword && (
-              <span className="text-danger"> {errors.confirmPassword}</span>
+              <span className="error"> {errors.confirmPassword}</span>
             )}
           </div>
-          {signupError && <span className="text-danger">{signupError}</span>}
-          <button type="submit" className="btn btn-success w-100">
-            {" "}
+          {signupError && <span className="error">{signupError}</span>}
+          <button type="submit" className="submit-button">
             Sign up
           </button>
-          <p></p>
-          <Link
-            to="/"
-            className="btn btn-default border w-100 bg-light text-decoration-none"
-          >
-            Login
+          <Link to="/" className="alt-link">
+            Already have an account? Login
           </Link>
         </form>
       </div>
     </div>
   );
 }
+
 export default Signup;

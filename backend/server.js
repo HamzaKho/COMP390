@@ -545,6 +545,7 @@ app.post("/addFavourite", (req, res) => {
               .status(500)
               .json({ message: "Database error", preferenceError });
           }
+          console.log(`Game ID ${gameId} liked for user ID ${loggedInUserId}`);
           return res.status(200).json({
             message: "Game added to favorites and liked successfully",
           });
@@ -772,6 +773,23 @@ app.get("/reviews/:gameId", (req, res) => {
   `;
 
   db.query(sql, [gameId], (error, results) => {
+    if (error) {
+      console.error("Failed to fetch reviews:", error);
+      return res.status(500).json({ message: "Error fetching reviews" });
+    }
+    res.json(results);
+  });
+});
+
+app.get("/userReviews/:userId", (req, res) => {
+  const { userId } = req.params;
+  const sql = `
+    SELECT * FROM game_reviews
+    WHERE user_id = ?
+    ORDER BY review_date DESC
+  `;
+
+  db.query(sql, [userId], (error, results) => {
     if (error) {
       console.error("Failed to fetch reviews:", error);
       return res.status(500).json({ message: "Error fetching reviews" });

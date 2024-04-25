@@ -111,10 +111,12 @@ const GameDetailsModal = ({ game, onClose, loggedInUserId }) => {
 const FriendModal = ({ isOpen, onRequestClose, friend, loggedInUserId }) => {
   const [favoriteGames, setFavoriteGames] = useState([]);
   const [selectedGame, setSelectedGame] = useState(null);
+  const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
     if (isOpen && friend) {
       fetchFavoriteGames(friend);
+      fetchReviews(friend);
     }
   }, [isOpen, friend]);
 
@@ -144,6 +146,47 @@ const FriendModal = ({ isOpen, onRequestClose, friend, loggedInUserId }) => {
     } catch (error) {
       console.error("Error fetching favorite games:", error);
       setFavoriteGames([]);
+    }
+  };
+
+  const fetchReviews = async (friendId) => {
+    try {
+      const res = await fetch(`http://localhost:8081/getUserId/${friendId}`);
+      if (res.ok) {
+        const friendUserId = await res.json();
+        try {
+          const response = await fetch(
+            `http://localhost:8081/userReviews/${friendUserId.userId}`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            const reviewsWithGameDetails = await Promise.all(
+              data.map(async (review) => {
+                const gameResponse = await fetch(
+                  `https://api.rawg.io/api/games/${review.game_id}?key=32d80d72ca6b4f50836ace2da6d74fb8`
+                );
+                if (!gameResponse.ok)
+                  throw new Error("Failed to fetch game details.");
+                const gameData = await gameResponse.json();
+                return {
+                  ...review,
+                  gameName: gameData.name,
+                  gameImage: gameData.background_image,
+                };
+              })
+            );
+            setReviews(reviewsWithGameDetails);
+          } else {
+            console.error("error getting reviews", response.status);
+          }
+        } catch (error) {
+          console.error("error fetching reviews", error);
+        }
+      } else {
+        console.error("Error fetching reviews");
+      }
+    } catch (error) {
+      console.error("Error fetching reviews: ", error);
     }
   };
 
@@ -183,9 +226,35 @@ const FriendModal = ({ isOpen, onRequestClose, friend, loggedInUserId }) => {
             ))}
           </div>
         ) : (
-          <p>No favorite games found.</p>
+          <p>{friend + " has not favourited any games yet!"}</p>
         )}
       </div>
+      <div className="reviews-section">
+        <h2>{friend + "'s Reviews:"}</h2>
+        {reviews.length === 0 ? (
+          <p>{friend + " has not left any reviews yet!"}</p>
+        ) : (
+          <div className="reviews-list">
+            {reviews.map((review, index) => (
+              <div key={index} className="review">
+                <div className="review-box">
+                  <img
+                    src={review.gameImage}
+                    alt={review.gameName}
+                    className="review-game-image"
+                  />
+                  <div className="review-text-container">
+                    <h4>{review.gameName}</h4>
+                    <h5>{review.star_rating}/5 stars</h5>
+                    <p>{review.review_text}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <button className="close-button" onClick={() => closeModal()}>
         X
       </button>
