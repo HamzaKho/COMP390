@@ -40,7 +40,8 @@
     ]
   },
   "devDependencies": {
-    "jest": "^27.5.1"
+    "jest": "^27.5.1",
+    "jest-mock-axios": "^4.7.3"
   },
   "jest": {
     "moduleNameMapper": {
